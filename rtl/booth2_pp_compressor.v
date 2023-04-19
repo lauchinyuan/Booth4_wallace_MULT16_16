@@ -3,16 +3,9 @@
 // Company: Zhengzhou University
 // Author: Lau chinyuan
 // Create Date: 2023/04/08 17:24:06
-// Design Name: 
 // Module Name: booth2_pp_compressor
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
 // Dependencies: 将16bit乘法器通过Booth2算法产生的8个部分积进行压缩
 //使用3:2压缩方案和4:2压缩方案
-// 
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -221,8 +214,8 @@ module booth2_pp_compressor(
 	
 	//补全部分积3(PPC1_3)和部分积4(PPC1_4)没有用到压缩的位置
 	//没有变化的位置
-	assign PPC1_3[3:0] = PP3_ext[3:0]; 
-	assign PPC1_4[1:0] = PP4_ext[1:0];
+	assign PPC1_3[3:0] = PP5_ext[3:0]; 
+	assign PPC1_4[1:0] = PP6_ext[1:0];
 	assign PPC1_4[2] = 1'b0; //第一次使用3:2压缩器的位置，进位部分积没有进位
 	
 	

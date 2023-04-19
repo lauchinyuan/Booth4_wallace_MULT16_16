@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
 // Author: lauchinyuan
 // Email:lauchinyuan@yeah.net
 // Create Date: 2023/04/09 16:39:11
@@ -34,7 +33,9 @@ module booth2_pp_gen(
 	
 	//部分积由B、-B、0及相应的移位数据产生
 	wire [15:0] inversed_B	;  //-1*B
-	assign inversed_B = ~B_NUM + 16'h0001; //-1*B
+	wire [16:0]	inversed_Bx2;  //-2*B
+	assign inversed_B = ~B_NUM + 16'b1; //-1*B
+	assign inversed_Bx2 = {inversed_B, 1'b0};
 	
 	assign B_code1 = {A_NUM[1:0],1'b0}	;
 	assign B_code2 = A_NUM[3:1]			;
@@ -53,17 +54,17 @@ module booth2_pp_gen(
 				PP1 = 17'b0;
 			end
 			3'b001,3'b010: begin
-				PP1 = {B_NUM[15],B_NUM};
+				PP1 = {B_NUM[15],B_NUM};  //B
 			end
 			3'b011: begin
-				PP1 = {B_NUM, 1'b0};
+				PP1 = {B_NUM, 1'b0};  //2B
 			end
 			3'b100: begin
-				PP1 = {inversed_B, 1'b0};
+				PP1 = inversed_Bx2;  //-2B
 			end
 			default: begin  //3'b101,3'b110
 				//符号位扩展
-				PP1 = {inversed_B[15], inversed_B};
+				PP1 = {inversed_B[15], inversed_B}; //-B
 			end	
 		endcase
 	end
@@ -81,7 +82,7 @@ module booth2_pp_gen(
 				PP2 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP2 = {inversed_B, 1'b0};
+				PP2 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP2 = {inversed_B[15], inversed_B};
@@ -102,7 +103,7 @@ module booth2_pp_gen(
 				PP3 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP3 = {inversed_B, 1'b0};
+				PP3 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP3 = {inversed_B[15], inversed_B};
@@ -123,7 +124,7 @@ module booth2_pp_gen(
 				PP4 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP4 = {inversed_B, 1'b0};
+				PP4 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP4 = {inversed_B[15], inversed_B};
@@ -144,7 +145,7 @@ module booth2_pp_gen(
 				PP5 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP5 = {inversed_B, 1'b0};
+				PP5 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP5 = {inversed_B[15], inversed_B};
@@ -165,7 +166,7 @@ module booth2_pp_gen(
 				PP6 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP6 = {inversed_B, 1'b0};
+				PP6 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP6 = {inversed_B[15], inversed_B};
@@ -186,7 +187,7 @@ module booth2_pp_gen(
 				PP7 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP7 = {inversed_B, 1'b0};
+				PP7 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP7 = {inversed_B[15], inversed_B};
@@ -196,7 +197,7 @@ module booth2_pp_gen(
 
 	//PP8
 	always @ (*) begin
-		case(B_code1) 
+		case(B_code8) 
 			3'b000,3'b111: begin
 				PP8 = 17'b0;
 			end
@@ -207,7 +208,7 @@ module booth2_pp_gen(
 				PP8 = {B_NUM, 1'b0};
 			end
 			3'b100: begin
-				PP8 = {inversed_B, 1'b0};
+				PP8 = inversed_Bx2;
 			end
 			default: begin  //3'b101,3'b110
 				PP8 = {inversed_B[15], inversed_B};
