@@ -24,8 +24,20 @@ module mult_16_16_top(
 	wire [16:0]		PP8		;
 	
 	//经过wallace算法压缩后输出的两个部分积
-	wire [31:0]		PPcompressed1	;
-	wire [31:0]		PPcompressed2	;
+	wire [30:0]		PPcompressed1	;
+	wire [30:0]		PPcompressed2	;
+	
+	//结果的符号位,直接计算得到
+	wire 			sign			;
+	
+	
+	//生成符号位
+	num_preprocessor num_preprocessor_inst(
+		.A_NUM_sign(A_NUM[15]),
+		.B_NUM_sign(B_NUM[15]),
+
+		.sign      (sign	)
+    );
 
 	
 	
@@ -64,9 +76,13 @@ module mult_16_16_top(
 		.PPout2     (PPcompressed2)
     );
 	
+	
+	//求得最后结果
 	adder_32 adder_32_inst(
 		.A		(PPcompressed1	),
 		.B		(PPcompressed2	),
+		.sign	(sign			),
+		
 		.C		(C_NUM			)
     );
 	

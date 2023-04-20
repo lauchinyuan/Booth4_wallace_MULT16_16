@@ -4,16 +4,18 @@
 // Email:lauchinyuan@yeah.net
 // Create Date: 2023/04/09 19:48:06
 // Module Name: adder_32
-// Dependencies: 32bit adder
+// Dependencies: 32bit adder with input sign signal
 //////////////////////////////////////////////////////////////////////////////////
 module adder_32(
-		input wire 	[31:0] A,
-		input wire 	[31:0] B,
-		output wire	[31:0] C
+		input wire 	[30:0] 	A		,
+		input wire 	[30:0] 	B		,
+		input wire 			sign	,
+		
+		output wire	[31:0] 	C		
     );
 	
 	//各级产生的进位
-	wire [30:0] cout_adder_32bit;
+	wire [29:0] cout_adder_32bit;
 	
 	//最低位使用半加器
 	half_adder half_adder_32bit_0(
@@ -26,7 +28,7 @@ module adder_32(
 	
 	genvar i ;
 	generate
-		for(i = 1;i <= 30;i = i + 1) begin: adder_32_full_adder_inst
+		for(i = 1;i <= 29;i = i + 1) begin: adder_32_full_adder_inst
 			//3:2压缩器实质上是全加器
 			compressor_3_2 full_adder(
 				.i0	(A[i]),
@@ -41,13 +43,15 @@ module adder_32(
 	endgenerate
 	
 	compressor_3_2 full_adder_msb(
-				.i0	(A[31]),
-				.i1	(B[31]),
-				.ci	(cout_adder_32bit[30]),
+				.i0	(A[30]),
+				.i1	(B[30]),
+				.ci	(cout_adder_32bit[29]),
 
 				.co	(  ), //don't care
-				.d	(C[31])
+				.d	(C[30])
 			);
+	
+	assign C[31] = sign;
 	
 
 	
