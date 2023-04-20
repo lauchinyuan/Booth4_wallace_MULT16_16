@@ -70,6 +70,7 @@ module booth2_pp_compressor(
 	assign PP8_ext = {{1{PP8[16]}},PP8};
 	
 	
+	
 	//***************第一级压缩******************//
 	
 	//第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第1个3:2压缩器
@@ -109,7 +110,7 @@ module booth2_pp_compressor(
 	//第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第i个4:2压缩器
 	genvar i;
 	generate 
-		for(i=7;i<=30;i=i+1) begin: compressor_4_2_class1_ppc12_inst
+		for(i=7;i<=23;i=i+1) begin: compressor_4_2_class1_ppc12_inst
 			compressor_4_2 compressor_4_2_class1_ppc12_i (
 					.i0	(PP1_ext[i]),
 					.i1	(PP2_ext[i-2]),
@@ -124,26 +125,13 @@ module booth2_pp_compressor(
 		end
 	endgenerate
 	
-	
-	//第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的最后个4:2压缩器
-	compressor_4_2 compressor_4_2_class1_ppc12_last (
-		.i0	(PP1_ext[31]),
-		.i1	(PP2_ext[29]),
-		.i2	(PP3_ext[27]),
-		.i3	(PP4_ext[25]),
-		.ci	(cout_class1_ppc12[24]),  //第一个压缩器的进位输入为0
-
-		.co	(),  //超出范围，don't care       
-		.c	(),  //超出范围，don't care
-		.d	(PPC1_1[31])
-    );	
-	
-	
 	//补全部分积1(PPC1_1)和部分积2(PPC1_2)没有用到压缩的位置
 	//没有变化的位置
 	assign PPC1_1[3:0] = PP1_ext[3:0]; 
+	assign PPC1_1[31:24] = {8{PPC1_1[23]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
 	assign PPC1_2[1:0] = PP2_ext[1:0];
 	assign PPC1_2[2] = 1'b0; //第一次使用3:2压缩器的位置，进位部分积没有进位
+	assign PPC1_2[29:23] = {7{PPC1_2[22]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
 	
 	
 	
