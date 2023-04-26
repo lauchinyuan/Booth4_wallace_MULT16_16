@@ -12,8 +12,12 @@ module compressor_4_2(
 		output wire d	
     );
 	
-	assign d = i0 ^ i1 ^ i2 ^ i3 ^ ci;
+	wire xored_i0123	;   //中间变量i0 ^ i1 ^ i2 ^ i3
+	
+	assign xored_i0123 = i0 ^ i1 ^ i2 ^ i3;
+	
+	assign d = xored_i0123 ^ ci;
 	assign co = (i0 | i1) & (i2 | i3); 
-	assign c = ((i0 ^ i1 ^ i2 ^ i3) & ci) | ~(((i0 ^ i1 ^ i2 ^ i3) | ~((i0 & i1) | (i2 & i3))));
+	assign c = (xored_i0123 & ci) | ~((xored_i0123 | ~((i0 & i1) | (i2 & i3))));
 	
 endmodule
