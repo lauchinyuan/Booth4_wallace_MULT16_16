@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Author: Lau chinyuan
+// Company: 
+// Engineer: 
 // Create Date: 2023/04/20 19:23:13
 // Module Name: simplify_compressor_4_2
 // Description: 简化的4:2压缩器，省去了输出co、c的电路资源，只输出d
