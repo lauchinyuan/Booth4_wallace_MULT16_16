@@ -31,11 +31,16 @@ module booth2_pp_gen(
 	wire [2:0]	B_code7	;
 	wire [2:0]	B_code8	;
 	
-	//部分积由B、-B、0及相应的移位数据产生
+	//部分积由-1*A
 	wire [15:0] inversed_A	;  //-1*A
-	wire [16:0]	inversed_Ax2;  //-2*A
-	assign inversed_A = ~A_NUM + 16'b1; //-1*A
-	assign inversed_Ax2 = {inversed_A, 1'b0};
+	
+	
+	//产生-1*A,使用专用的电路,而不使用加法器,减少资源开销
+	inv_converter_16 inv_converter_16_inst(
+		.data_i	(A_NUM),//输入数据
+
+		.inv_o	(inversed_A) //输出相反数
+    );
 	
 	assign B_code1 = {B_NUM[1:0],1'b0}	;
 	assign B_code2 = B_NUM[3:1]			;
