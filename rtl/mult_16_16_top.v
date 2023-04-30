@@ -24,6 +24,7 @@ module mult_16_16_top(
 	wire [16:0]		PP8		;
 	
 	//经过wallace算法压缩后输出的两个部分积
+	//不包括最高位符号位,因为最高位符号位直接用输入数据的异或门计算
 	wire [30:0]		PPcompressed1	;
 	wire [30:0]		PPcompressed2	;
 	
@@ -38,9 +39,6 @@ module mult_16_16_top(
 
 		.sign      (sign	)
     );
-
-	
-	
 	
 	//生成8个部分积
 	//注意:这里产生的部分积并未进行移位操作和补零操作
@@ -73,7 +71,7 @@ module mult_16_16_top(
 		.PP8		(PP8	),
 
 		.PPout1		(PPcompressed1),  //压缩后生成的两个部分积
-		.PPout2     (PPcompressed2)
+		.PPout2     (PPcompressed2)	  //PPcompressed1是29位数据
     );
 	
 	

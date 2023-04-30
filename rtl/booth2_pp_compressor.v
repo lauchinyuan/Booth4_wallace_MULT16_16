@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: Zhengzhou University
-// Author: Lau chinyuan
+// Author: lauchinyuan
 // Create Date: 2023/04/08 17:24:06
 // Module Name: booth2_pp_compressor
 // Dependencies: 将16bit乘法器通过Booth2算法产生的8个部分积进行压缩
@@ -23,8 +23,8 @@ module booth2_pp_compressor(
 		input wire [16:0] PP7	,
 		input wire [16:0] PP8	,
 
-		output wire [30:0] PPout1,  //压缩后生成的两个部分积
-		output wire [30:0] PPout2
+		output wire [30:0] PPout1,  //压缩后生成的第一个部分积,不含符号位
+		output wire [28:0] PPout2	//压缩后生成的第二个部分积,不含符号位,低位暂未补零
     );
 	
 	//符号位扩展后部分积
@@ -280,6 +280,6 @@ module booth2_pp_compressor(
 	
 	//****************************************输出两个压缩后的部分积****************************************//
 	assign PPout1 = PPC2_1;
-	assign PPout2 = {PPC2_2,2'b0};
+	assign PPout2 = PPC2_2;
 	
 endmodule

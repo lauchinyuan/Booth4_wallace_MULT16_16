@@ -22,8 +22,8 @@ module tb_booth2_pp_compressor(
 	reg [16:0] PP7		;
 	reg [16:0] PP8		;
 	
-	wire[31:0] PPout1	;
-	wire[31:0] PPout2	;
+	wire[30:0] PPout1	;
+	wire[28:0] PPout2	;
 	
 	initial begin
 		PP1 <= 17'b0_0000_0000_0000_0001;
