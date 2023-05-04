@@ -46,17 +46,16 @@ module booth2_pp_decoder(
     wire    [15:0]  nor_2xA_inv     ;   //对应项为2A时或非门输出
     
     //中间变量产生
-    assign xor_0_1 = code[0] ^ code[1];
-    assign not_xor_0_1 = ~xor_0_1;
+    assign xnor_0_1 = ~(code[0] ^ code[1]);  
     assign not_2 = ~code[2];
-    assign not_1 = ~code[1];
+
     
     //译码,标志信号产生
-    //使用或非门结合与门实现
-    assign flag_A       = ~(code[2] | not_xor_0_1);
-    assign flag_inv_A   = ~(not_2   | not_xor_0_1);
-    assign flag_2xA     = (~(code[2] | xor_0_1)) & code[1];
-    assign flag_inv_2xA = (~(not_2  | xor_0_1)) & not_1;
+    //使用或非门结合与非门实现
+    assign flag_A       = ~(code[2] | xnor_0_1);
+    assign flag_inv_A   = ~(not_2   | xnor_0_1);
+    assign flag_2xA     = ~((~(code[1] & code[0])) | code[2]);
+    assign flag_inv_2xA = ~((~(code[2] & xnor_0_1)) | code[1]);
     
     //与门对应项产生
     //这里产生的实际上是A[15:0]以及-A[15:0]
