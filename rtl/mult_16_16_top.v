@@ -25,8 +25,9 @@ module mult_16_16_top(
     
     //经过wallace算法压缩后输出的两个部分积
     //不包括最高位符号位,因为最高位符号位直接用输入数据的异或门计算
+    //PPcompressed2是29bit,产生的第二个部分积的最低2bit一定是0,为简化电路结构,这里直接忽略
     wire [30:0]     PPcompressed1   ;
-    wire [30:0]     PPcompressed2   ;
+    wire [28:0]     PPcompressed2   ;
     
     //结果的符号位,直接计算得到
     wire            sign            ;

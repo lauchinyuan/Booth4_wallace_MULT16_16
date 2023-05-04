@@ -17,9 +17,7 @@ module compressor_4_2(
     assign xored_i0123 = i0 ^ i1 ^ i2 ^ i3;
     
     assign d = xored_i0123 ^ ci;
-    //assign co = (i0 | i1) & (i2 | i3); 
-    assign co = ~((i0 & i1) | (i2 & i3));
-    //assign c = (xored_i0123 & ci) | ~(xored_i0123 | ~((i0 & i1) | (i2 & i3)));
-    assign c = (xored_i0123 & ci) | ~(xored_i0123 | co);
+    assign co = (i0 | i1) & (i2 | i3);
+    assign c = (xored_i0123 & ci) | ~(xored_i0123 | ~((i0 & i1) | (i2 & i3)));
     
 endmodule

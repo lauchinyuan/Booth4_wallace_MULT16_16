@@ -42,7 +42,7 @@ module booth2_pp_gen(
         .inv_o  (inversed_A) //输出相反数
 );
     
-    assign B_code1 = {B_NUM[1:0],1'b0}  ;
+    assign B_code1 = B_NUM[1:0]         ;
     assign B_code2 = B_NUM[3:1]         ;
     assign B_code3 = B_NUM[5:3]         ;
     assign B_code4 = B_NUM[7:5]         ;
@@ -51,15 +51,25 @@ module booth2_pp_gen(
     assign B_code7 = B_NUM[13:11]       ;
     assign B_code8 = B_NUM[15:13]       ;
     
-    //通过例化8个booth2_pp_decoder模块得到8个部分积
+    //通过例化7个booth2_pp_decoder模块和1个booth2_pp_decoder_pp1得到8个部分积
+    
+    //PP1的产生使用简化版的pp_decoder
     //PP1
+    booth2_pp_decoder_pp1 booth2_pp_decoder_pp1(
+        .code_2bit   (B_code1    ),  //原本要输入3bit booth编码,对于一个部分积只需要2bit,最低位编码一定为0
+        .A           (A_NUM      ),  //被乘数A
+        .inversed_A  (inversed_A ),  //取反后的被乘数(-A)
+
+        .pp_out      (PP1        )   //输出的部分积,输出17bit
+    );
+/*     //PP1
     booth2_pp_decoder booth2_pp_decoder_pp1(
         .code       (B_code1            ),  //输入的3bit编码
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
         .pp_out     (PP1                )   //输出的部分积,输出17bit
-    );
+    ); */
 
     //PP2
     booth2_pp_decoder booth2_pp_decoder_pp2(
