@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: Zhengzhou University
 // Author: lauchinyuan
+// Email: lauchinyuan@yeah.net
 // Create Date: 2023/04/08 17:24:06
 // Module Name: booth2_pp_compressor
 // Dependencies: 将16bit乘法器通过Booth2算法产生的8个部分积进行压缩
@@ -91,18 +91,18 @@ module booth2_pp_compressor(
         .d  (PPC1_1[5])
     );  
     
-    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第1个4:2压缩器
-    compressor_4_2 compressor_4_2_class1_ppc12_1 (
-        .i0 (PP1_ext[6]),
-        .i1 (PP2_ext[4]),
-        .i2 (PP3_ext[2]),
-        .i3 (PP4_ext[0]),
-        .ci (1'b0),  //第一个压缩器的进位输入为0
+    
+    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第1个4:2压缩器,使用不考虑进位的4:2压缩器
+    non_cin_compressor_4_2 compressor_4_2_class1_ppc12_1(
+        .i0  (PP1_ext[6]),
+        .i1  (PP2_ext[4]),
+        .i2  (PP3_ext[2]),
+        .i3  (PP4_ext[0]),
 
-        .co (cout_class1_ppc12[0]),
-        .c  (PPC1_2[5]),
-        .d  (PPC1_1[6])
-    );  
+        .co  (cout_class1_ppc12[0]),
+        .c   (PPC1_2[5]),
+        .d   (PPC1_1[6])
+    );
     
     
     //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第i个4:2压缩器
@@ -153,20 +153,23 @@ module booth2_pp_compressor(
 
         .co (PPC1_4[4]),
         .d  (PPC1_3[5])
-    );  
+    ); 
+
     
-    //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第1个4:2压缩器
-    compressor_4_2 compressor_4_2_class1_ppc34_1 (
+    
+    //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第1个4:2压缩器,使用不考虑进位的4:2压缩器
+    non_cin_compressor_4_2 compressor_4_2_class1_ppc34_1 (
         .i0 (PP5_ext[6]),
         .i1 (PP6_ext[4]),
         .i2 (PP7_ext[2]),
         .i3 (PP8_ext[0]),
-        .ci (1'b0),  //第一个压缩器的进位输入为0
 
         .co (cout_class1_ppc34[0]),
         .c  (PPC1_4[5]),
         .d  (PPC1_3[6])
-    );  
+    ); 
+
+
     
     //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第i个4:2压缩器
     generate 
