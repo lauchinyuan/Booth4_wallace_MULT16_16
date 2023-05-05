@@ -53,7 +53,7 @@ module inv_converter_16(
     //inv_o[15]直接由上一级半加器进位输出 以及本权值的输入数据异或产生
     assign inv_o[15] = wire_cout[13] ^ bit_inv_data[15];
     
-    //按位取反,使用16个非门,最低位实质上不需要取反,后面不使用
+    //按位取反,使用16个非门
     assign bit_inv_data = ~data_i;  
     
 endmodule
