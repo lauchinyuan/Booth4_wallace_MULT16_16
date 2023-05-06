@@ -25,24 +25,22 @@ module mult_16_16_top(
     
     //经过wallace算法压缩后输出的两个部分积
     //不包括最高位符号位,因为最高位符号位直接用输入数据的异或门计算
-    //PPcompressed2是29bit,产生的第二个部分积的最低2bit一定是0,为简化电路结构,这里直接忽略
-    wire [30:0]     PPcompressed1   ;
-    wire [28:0]     PPcompressed2   ;
-    
-    //结果的符号位,直接计算得到
-    wire            sign            ;
+    //PPcompressed2是30bit,产生的第二个部分积的最低2bit一定是0,为简化电路结构,这里直接忽略
+    wire [31:0]     PPcompressed1   ;
+    wire [29:0]     PPcompressed2   ;
     
     
-    //生成符号位
+    
+/*     //生成符号位
     num_preprocessor num_preprocessor_inst(
         .A_NUM_sign (A_NUM[15]),
         .B_NUM_sign (B_NUM[15]),
 
         .sign       (sign   )
-    );
+    ); */
     
     //生成8个部分积
-    //注意:这里产生的部分积并未进行移位操作和补零操作
+    //注意:这里产生的部分积并未进行低位补零操作
     booth2_pp_gen booth2_pp_gen_inst(
         .A_NUM      (A_NUM  ),  //乘数
         .B_NUM      (B_NUM  ),  //被乘数
@@ -80,7 +78,6 @@ module mult_16_16_top(
     adder_32 adder_32_inst(
         .A      (PPcompressed1  ),
         .B      (PPcompressed2  ),
-        .sign   (sign           ),
         
         .C      (C_NUM          )
     );

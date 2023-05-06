@@ -4,60 +4,17 @@
 // Email:lauchinyuan@yeah.net
 // Create Date: 2023/04/09 19:48:06
 // Module Name: adder_32
-// Dependencies: 32bit adder with input sign signal
+// Dependencies: 32bit adder 
 //////////////////////////////////////////////////////////////////////////////////
 module adder_32(
-        input wire  [30:0]  A       ,
-        input wire  [28:0]  B       ,
-        input wire          sign    ,
+        input wire  [31:0]  A       ,
+        input wire  [29:0]  B       ,
         
         output wire [31:0]  C       
     );
     
     
-    wire [29:0] cout_adder_32bit;
-    
-/*  //各级产生的进位
-    wire [29:0] cout_adder_32bit;
-    
-    //最低位使用半加器
-    half_adder half_adder_32bit_0(
-        .a      (A[0])                  ,
-        .b      (B[0])                  ,
-
-        .cout   (cout_adder_32bit[0])   ,
-        .sum    (C[0])
-    );
-    
-    genvar i ;
-    generate
-        for(i = 1;i <= 29;i = i + 1) begin: adder_32_full_adder_inst
-            //3:2压缩器实质上是全加器
-            compressor_3_2 full_adder(
-                .i0 (A[i]),
-                .i1 (B[i]),
-                .ci (cout_adder_32bit[i-1]),
-
-                .co (cout_adder_32bit[i]),
-                .d  (C[i])
-            );
-        end
-
-    endgenerate
-    
-    compressor_3_2 full_adder_msb(
-                .i0 (A[30]),
-                .i1 (B[30]),
-                .ci (cout_adder_32bit[29]),
-
-                .co (  ), //don't care
-                .d  (C[30])
-            );
-     */
-     
-     
-    //输出数据的最高位直接由输入数据最高位异或产生
-    assign C[31] = sign;
+    wire [28:0] cout_adder_32bit;
     
     //输出数据的低两位就是31bit输入数据的低两位
     assign C[1:0] = A[1:0];
@@ -117,10 +74,10 @@ module adder_32(
         .sum    (C[8])
     );  
     
-    //C[29:9]使用全加器生成
+    //C[30:9]使用全加器生成
     genvar j;
     generate
-        for(j=9;j<=29;j=j+1) begin
+        for(j=9;j<=30;j=j+1) begin
             compressor_3_2 full_adder_c29_9(
                         .i0 (A[j]),
                         .i1 (B[j-2]),
@@ -132,7 +89,7 @@ module adder_32(
         end
     endgenerate 
     
-    //C[30](最高位)使用异或门生成,相当于不输出进位的全加器,减少资源开销
-    assign C[30] = A[30] ^ B[28] ^ cout_adder_32bit[27];
+    //C[31](最高位)使用异或门生成,相当于不输出进位的全加器,减少资源开销
+    assign C[31] = A[31] ^ B[29] ^ cout_adder_32bit[28];
     
 endmodule

@@ -11,10 +11,9 @@ module tb_adder_32();
     //为了方便在Modelsim中观察,使用补零后的字长,但B输入模块时,将低两位数据舍去
     reg signed  [31:0]  A_FULL              ;  
     reg signed  [31:0]  B_FULL              ;
-    wire                sign                ;
     wire        [31:0]  C                   ;
     wire signed [31:0]  ture_value          ;  //仿真计算出来的真实值
-    wire        [31:0]  error               ;  //真实值与模块计算值之间的误差
+    wire                error_flag          ;  //计算错误标志
     
     integer i;
     
@@ -39,16 +38,14 @@ module tb_adder_32();
     
     //真实的计算结果
     assign ture_value = A_FULL + B_FULL ;
-    //输入到模块的符号位
-    assign sign = ture_value[31]        ;
-    assign error = ture_value - C       ;
+    //错误标志信号
+    assign error_flag = (ture_value == C);
     
     
     
     adder_32 adder_32_inst(
-        .A      (A_FULL[30:0]   ),
-        .B      (B_FULL[30:2]   ),
-        .sign   (sign           ),
+        .A      (A_FULL[31:0]   ),
+        .B      (B_FULL[31:2]   ),
                     
         .C      (C              )
     );

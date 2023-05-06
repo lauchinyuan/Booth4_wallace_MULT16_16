@@ -23,49 +23,67 @@ module booth2_pp_compressor(
         input wire [16:0] PP7   ,
         input wire [16:0] PP8   ,
 
-        output wire [30:0] PPout1,  //压缩后生成的第一个部分积,不含符号位
-        output wire [28:0] PPout2   //压缩后生成的第二个部分积,不含符号位,低位暂未补零
+        output wire [31:0] PPout1,  //压缩后生成的第一个部分积
+        output wire [29:0] PPout2   //压缩后生成的第二个部分积,低位暂未补零
     );
     
     //符号位扩展后部分积
-    wire [30:0] PP1_ext;   //经过符号位扩展后的PP1
-    wire [28:0] PP2_ext;   //经过符号位扩展后的PP2，最低位暂不补零
-    wire [26:0] PP3_ext;   
-    wire [24:0] PP4_ext;
-    wire [22:0] PP5_ext;
-    wire [20:0] PP6_ext;
-    wire [18:0] PP7_ext;
-    wire [16:0] PP8_ext;
+    wire [31:0] PP1_ext;   //经过符号位扩展后的PP1
+    wire [29:0] PP2_ext;   //经过符号位扩展后的PP2，最低位暂不补零
+    wire [27:0] PP3_ext;   
+    wire [25:0] PP4_ext;
+    wire [23:0] PP5_ext;
+    wire [21:0] PP6_ext;
+    wire [19:0] PP7_ext;
+    wire [17:0] PP8_ext;
     
     //第一次压缩产生的部分积
-    wire [30:0] PPC1_1;  //第一级压缩产生的部分积1
-    wire [28:0] PPC1_2; //第一级压缩产生的部分积2,低位暂未补零
-    wire [22:0] PPC1_3; //第一级压缩产生的部分积3,低位暂未补零
-    wire [20:0] PPC1_4; //第一级压缩产生的部分积4,低位暂未补零
+    wire [31:0] PPC1_1;  //第一级压缩产生的部分积1
+    wire [29:0] PPC1_2; //第一级压缩产生的部分积2,低位暂未补零
+    wire [23:0] PPC1_3; //第一级压缩产生的部分积3,低位暂未补零
+    wire [21:0] PPC1_4; //第一级压缩产生的部分积4,低位暂未补零
     
-    wire [30:0] PPC2_1;//第二级压缩产生的部分积1
-    wire [28:0] PPC2_2;//第二级压缩产生的部分积2,低位暂未补零
+    wire [31:0] PPC2_1;//第二级压缩产生的部分积1
+    wire [29:0] PPC2_2;//第二级压缩产生的部分积2,低位暂未补零
     
     
-    //改
-    //4:2压缩器的进位连线
-    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到26个4:2压缩器
-    //有25个cout输出连线，最高位进位输出舍去
-    wire [17:0] cout_class1_ppc12; 
-    //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)时用18个4:2压缩器
-    wire [15:0] cout_class1_ppc34;
-    //第二级压缩用22个4:2压缩器
-    wire [19:0] cout_class2;
     
-    //符号位扩展,低位暂未补零
+    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到的4:2压缩器的进位连线
+    //最高位进位输出舍去(不考虑)
+    wire [18:0] cout_class1_ppc12; 
+    //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)时用到的4:2压缩器的进位连线
+    //最高位进位输出舍去(不考虑)
+    wire [16:0] cout_class1_ppc34;
+    //第二级压缩4:2压缩器的进位连线
+    wire [20:0] cout_class2;
+    
+    
+    //部分积符号位扩展,低位暂未补零
     assign PP1_ext = {{7{PP1[16]}},PP1};
     assign PP2_ext = {{5{PP2[16]}},PP2};
     assign PP3_ext = {{3{PP3[16]}},PP3};
     assign PP4_ext = {{1{PP4[16]}},PP4};    
-    assign PP5_ext = {{6{PP5[16]}},PP5};
-    assign PP6_ext = {{4{PP6[16]}},PP6};    
-    assign PP7_ext = {{2{PP7[16]}},PP7};
-    assign PP8_ext = PP8;
+    assign PP5_ext = {{7{PP5[16]}},PP5};
+    assign PP6_ext = {{5{PP6[16]}},PP6};    
+    assign PP7_ext = {{3{PP7[16]}},PP7};
+    assign PP8_ext = {{1{PP8[16]}},PP8};
+    
+
+    //使用nand_xor_compressor_4_2模块,需要在模块外部计算i0 ^ i1 以及 ~(i0 & i1)
+    //这一计算结果作为中间结果,实现资源复用,以下是在各级压缩时,所用到的计算结果
+    
+    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    wire    i0_xor_i1_class1_ppc12       ;
+    wire    i0_nand_i1_class1_ppc12      ;
+   
+    //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    wire    i0_xor_i1_class1_ppc34       ;
+    wire    i0_nand_i1_class1_ppc34      ;
+
+    //第一级压缩时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    wire    i0_xor_i1_class2             ;
+    wire    i0_nand_i1_class2            ;    
+
     
     
     
@@ -108,7 +126,7 @@ module booth2_pp_compressor(
     //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第i个4:2压缩器
     genvar i;
     generate 
-        for(i=7;i<=23;i=i+1) begin: compressor_4_2_class1_ppc12_inst
+        for(i=7;i<=17;i=i+1) begin: compressor_4_2_class1_ppc12_inst
             compressor_4_2 compressor_4_2_class1_ppc12_i (
                     .i0 (PP1_ext[i]),
                     .i1 (PP2_ext[i-2]),
@@ -123,16 +141,39 @@ module booth2_pp_compressor(
         end
     endgenerate
     
+
+    //从PP1_ext[18](PP2_ext[16])开始,PP1_ext以及PP2_ext的更高位都是一样的数据
+    //可以复用原来基本4:2压缩器中的异或门以及与非门资源
+    //使用需要异或输入和与非输入的4:2压缩器nand_xor_compressor_4_2,以节约资源开销
+    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    assign i0_xor_i1_class1_ppc12  = PP1_ext[18] ^ PP2_ext[16]; //相当于原本4:2压缩器内部的i0 ^ i1运算
+    assign i0_nand_i1_class1_ppc12 = ~(PP1_ext[18] & PP2_ext[16]);// 相当于原本4:2压缩器内部~(i0 & i1)
+    
+    //例化nand_xor_compressor_4_2模块
+    generate 
+        for(i=18;i<=23;i=i+1) begin: nand_xor_compressor_4_2_class1_ppc12_inst
+            nand_xor_compressor_4_2 nand_xor_compressor_4_2_class1_ppc12_i(
+                .i0_xor_i1   (i0_xor_i1_class1_ppc12 ),   //输入的i0 ^ i1
+                .i0_nand_i1  (i0_nand_i1_class1_ppc12),   //输入的~(i0 & i1)
+                .i2          (PP3_ext[i-4]           ),
+                .i3          (PP4_ext[i-6]           ),
+                .ci          (cout_class1_ppc12[i-7] ),
+                        
+                .co          (cout_class1_ppc12[i-6] ),
+                .c           (PPC1_2[i-1]            ),
+                .d           (PPC1_1[i]              )
+            );           
+        end
+    endgenerate
+    
+    
     //补全部分积1(PPC1_1)和部分积2(PPC1_2)没有用到压缩的位置
     //没有变化的位置
     assign PPC1_1[3:0] = PP1_ext[3:0]; 
-    assign PPC1_1[30:24] = {7{PPC1_1[23]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
+    assign PPC1_1[31:24] = {8{PPC1_1[23]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
     assign PPC1_2[1:0] = PP2_ext[1:0];
     assign PPC1_2[2] = 1'b0; //第一次使用3:2压缩器的位置，进位部分积没有进位
-    assign PPC1_2[28:23] = {6{PPC1_2[22]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
-    
-    
-    
+    assign PPC1_2[29:23] = {7{PPC1_2[22]}}; //将最后一个4:2的输出结果进行扩展,生成压缩后的部分积
     
     
     //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第1个3:2压缩器
@@ -173,8 +214,8 @@ module booth2_pp_compressor(
     
     //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第i个4:2压缩器
     generate 
-        for(i=7;i<=21;i=i+1) begin: compressor_4_2_class1_ppc34_inst
-            compressor_4_2 compressor_4_2_class1_ppc34_i (
+        for(i=7;i<=17;i=i+1) begin: compressor_4_2_class1_ppc34_inst
+            compressor_4_2 nand_xor_compressor_4_2_class1_ppc34_i (
                     .i0 (PP5_ext[i]),
                     .i1 (PP6_ext[i-2]),
                     .i2 (PP7_ext[i-4]),
@@ -188,15 +229,40 @@ module booth2_pp_compressor(
         end
     endgenerate
     
+    //从PP5_ext[18](PP6_ext[16])开始,PP5_ext以及PP6_ext的更高位都是一样的数据
+    //可以复用原来基本4:2压缩器中的异或门以及与非门资源
+    //使用需要异或输入和与非输入的4:2压缩器nand_xor_compressor_4_2,以节约资源开销
+    //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    assign i0_xor_i1_class1_ppc34  = PP5_ext[18] ^ PP6_ext[16]; //相当于原本4:2压缩器内部的i0 ^ i1运算
+    assign i0_nand_i1_class1_ppc34 = ~(PP5_ext[18] & PP6_ext[16]);// 相当于原本4:2压缩器内部~(i0 & i1)
+    
+    //例化nand_xor_compressor_4_2模块
+    generate 
+        for(i=18;i<=22;i=i+1) begin: nand_xor_compressor_4_2_class1_ppc34_inst
+            nand_xor_compressor_4_2 nand_xor_compressor_4_2_class1_ppc34_i(
+                .i0_xor_i1   (i0_xor_i1_class1_ppc34 ),   //输入的i0 ^ i1
+                .i0_nand_i1  (i0_nand_i1_class1_ppc34),   //输入的~(i0 & i1)
+                .i2          (PP7_ext[i-4]           ),
+                .i3          (PP8_ext[i-6]           ),
+                .ci          (cout_class1_ppc34[i-7] ),
+                        
+                .co          (cout_class1_ppc34[i-6] ),
+                .c           (PPC1_4[i-1]            ),
+                .d           (PPC1_3[i]              )
+            );           
+        end
+    endgenerate
+    
+    
     //高位使用简化的4-2处理器,舍去产生co和c的资源
     simplify_compressor_4_2 compressor_4_2_class1_ppc34_last (
-        .i0 (PP5_ext[22]),
-        .i1 (PP6_ext[20]),
-        .i2 (PP7_ext[18]),
-        .i3 (PP8_ext[16]),
-        .ci (cout_class1_ppc34[15]),  //第一个压缩器的进位输入为0
+        .i0 (PP5_ext[23]),
+        .i1 (PP6_ext[21]),
+        .i2 (PP7_ext[19]),
+        .i3 (PP8_ext[17]),
+        .ci (cout_class1_ppc34[16]),  
 
-        .d  (PPC1_3[22])
+        .d  (PPC1_3[23])
     );  
     
     //补全部分积3(PPC1_3)和部分积4(PPC1_4)没有用到压缩的位置
@@ -231,23 +297,50 @@ module booth2_pp_compressor(
         .d  (PPC2_1[9])
     );
     
-    //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第1个4:2压缩器
-    compressor_4_2 compressor_4_2_class2_ppc12_1 (
+    //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第1个4:2压缩器,使用不考虑进位的4:2压缩器
+    non_cin_compressor_4_2 compressor_4_2_class2_ppc12_1 (
         .i0 (PPC1_1[10]),
         .i1 (PPC1_2[8]),
         .i2 (PPC1_3[2]),
         .i3 (PPC1_4[0]),
-        .ci (1'b0),  //第一个压缩器的进位输入为0
 
         .co (cout_class2[0]),
         .c  (PPC2_2[9]),
         .d  (PPC2_1[10])
     );  
     
+    //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第2个4:2压缩器
+    compressor_4_2 compressor_4_2_class2_ppc12_2 (
+        .i0 (PPC1_1[11]),
+        .i1 (PPC1_2[9]),
+        .i2 (PPC1_3[3]),
+        .i3 (PPC1_4[1]),
+        .ci (cout_class2[0]),
+
+        .co (cout_class2[1]),
+        .c  (PPC2_2[10]),
+        .d  (PPC2_1[11])
+    ); 
+    
+    //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第3个4:2压缩器,使用不考虑进位的4:2压缩器
+    //因为原本的PPC1_4[2]一定为0,故这里将来自上一级的进位输入i3
+    //这样变换后co依然只与i0、i1、i2有关,与cout_class2[1](i3)无关,不存在进位链传播的问题
+    non_cin_compressor_4_2 compressor_4_2_class2_ppc12_3 (
+        .i0 (PPC1_1[12]),
+        .i1 (PPC1_2[10]),
+        .i2 (PPC1_3[4]),
+        .i3 (cout_class2[1]),
+
+        .co (cout_class2[2]),
+        .c  (PPC2_2[11]),
+        .d  (PPC2_1[12])
+    ); 
+    
+    
     //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第i个4:2压缩器
     generate 
-        for(i=11;i<=29;i=i+1) begin: compressor_4_2_class2_ppc12_inst
-            compressor_4_2 compressor_4_2_class1_ppc12_i (
+        for(i=13;i<=22;i=i+1) begin: compressor_4_2_class2_ppc12_inst
+            compressor_4_2 compressor_4_2_class2_ppc12_i (
                     .i0 (PPC1_1[i]),
                     .i1 (PPC1_2[i-2]),
                     .i2 (PPC1_3[i-8]),
@@ -261,15 +354,39 @@ module booth2_pp_compressor(
         end
     endgenerate
     
+    //从PPC1_1[23](PPC1_2[21])开始,PPC1_1以及PPC1_1的更高位都是一样的数据
+    //可以复用原来基本4:2压缩器中的异或门以及与非门资源
+    //第二级压缩时用到的i0 ^ i1 以及 ~(i0 & i1)中间结果
+    assign i0_xor_i1_class2  = PPC1_1[23] ^ PPC1_2[21]; //相当于原本4:2压缩器内部的i0 ^ i1运算
+    assign i0_nand_i1_class2 = ~(PPC1_1[23] & PPC1_2[21]);// 相当于原本4:2压缩器内部~(i0 & i1)
+    
+    //例化nand_xor_compressor_4_2模块
+    generate 
+        for(i=23;i<=30;i=i+1) begin: nand_xor_compressor_4_2_class2_ppc12_inst
+            nand_xor_compressor_4_2 nand_xor_compressor_4_2_class2_ppc12_i(
+                .i0_xor_i1   (i0_xor_i1_class2          ),   //输入的i0 ^ i1
+                .i0_nand_i1  (i0_nand_i1_class2         ),   //输入的~(i0 & i1)
+                .i2          (PPC1_3[i-8]               ),
+                .i3          (PPC1_4[i-10]              ),
+                .ci          (cout_class2[i-11]         ),
+                        
+                .co          (cout_class2[i-10]         ),
+                .c           (PPC2_2[i-1]               ),
+                .d           (PPC2_1[i]                 )
+            );           
+        end
+    endgenerate
+    
+    
     //高位使用简化的4-2处理器,舍去产生co和c的资源
     simplify_compressor_4_2 compressor_4_2_class2_ppc12_last (
-        .i0 (PPC1_1[30]),
-        .i1 (PPC1_2[28]),
-        .i2 (PPC1_3[22]),
-        .i3 (PPC1_4[20]),
-        .ci (cout_class2[19]),  //第一个压缩器的进位输入为0
+        .i0 (PPC1_1[31]),
+        .i1 (PPC1_2[29]),
+        .i2 (PPC1_3[23]),
+        .i3 (PPC1_4[21]),
+        .ci (cout_class2[20]),  
 
-        .d  (PPC2_1[30])
+        .d  (PPC2_1[31])
     );      
 
     //补全部分积1(PPC2_1)和部分积2(PPC2_2)没有用到压缩的位置
