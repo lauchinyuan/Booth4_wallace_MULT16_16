@@ -10,71 +10,64 @@
 
 
 module booth2_pp_decoder_pp1(
-        input wire  [2:0]       code_2bit   ,  //原本要输入3bit booth编码,对于一个部分积只需要2bit,最低位编码一定为0
+        input wire  [1:0]       code_2bit   ,  //原本要输入3bit booth编码,对于一个部分积只需要2bit,最低位编码一定为0
         input wire  [15:0]      A           ,  //被乘数A
         input wire  [15:0]      inversed_A  ,  //取反后的被乘数(-A)
         
         output wire [16:0]      pp_out         //输出的部分积,输出17bit
     );
     
-    //flag信号产生的真值表,产生第一个部分积的booth编码的最低位一定是0
-    //--------------------------------------------------------------------------
-    //|    a    |    b    |    c    |   flag_A   | flag_inv_2xA |  flag_inv_A  |
-    //|    0    |    0    |    0    |      0     |      0       |      0       |
-    //|    0    |    1    |    0    |      1     |      0       |      0       |
-    //|    1    |    0    |    0    |      0     |      1       |      0       |
-    //|    1    |    1    |    0    |      0     |      0       |      1       |
-    //--------------------------------------------------------------------------
+    wire [15:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
     
-    //定义中间变量,实现资源复用
-    wire        not_a   ;
-    wire        not_b   ;
-    
-    //部分积标志信号,分别代表A、-A、-2A四种部分积产生情况
-    wire        flag_A      ;
-    wire        flag_inv_A  ;
-    wire        flag_inv_2xA;
-    
-    //部分积与对应的标志信号相与的中间结果
-    //对于A和-A其17bit表达中,最高位[16]和次高位[15]是一样的,无需重复计算,故只需进行16次与运算    
-    //注意:与的结果只是与或非门的中间结果,这一结果再通过或非门构成与或非门
-    wire [15:0]        and_A      ;  //对应项为A时与门输出,实际上是17bit表达形式中的[15:0]
-    wire [15:0]        and_inv_A  ;  //对应项为-A时与门输出,实际上是17bit表达形式中的[15:0]
-    
-    
-    wire [15:0]        nor_A_inv  ;  //对应项为A,-A时使用的或非门输出的结果,实际上是17bit表达形式中的[15:0]
-    
-    //对于-2A,其17bit表达中最低位[0]一定是0,进行与非运算后结果定为1,无需多余计算
-    //-2A这一部分积与对应flag信号进行与非运算的结果
-    wire [15:0]        nand_inv_2xA;  //对应项为-2A时与非门输出,实际上是17bit表达形式中的[16:1]
-   
-    
-    //中间变量的产生
-    assign      not_a = ~code_2bit[1]   ;
-    assign      not_b = ~code_2bit[0]   ;
-    
-    //部分积标志信号产生,使用或非门
-    assign      flag_A          = ~(code_2bit[1] | not_b)       ;
-    assign      flag_inv_2xA    = ~(not_a | code_2bit[0])       ;
-    assign      flag_inv_A      = ~(not_a | not_b       )       ;
-    
-    
-    //部分积中间数据与对应的标志信号相与的中间结果,实际上是17bit表达形式中的[15:0]
-    assign      and_A           = {16{flag_A}} & A                  ;
-    assign      and_inv_A       = {16{flag_inv_A}} & inversed_A     ;
-
-    //对应项为A,-A时使用的或非门,这一或非门与前面的与门一起构成与或非门
-    //实际上是17bit表达形式中的[15:0],[16]和[15]一样
-    assign      nor_A_inv       = ~(and_A | and_inv_A)              ;
- 
-    //-2A与对应flag_inv_2xA信号进行与非运算,实际上是17bit表达形式中的[16:1],[0]位与非的结果一定是1
-    assign      nand_inv_2xA    = ~({16{flag_inv_2xA}} & inversed_A);  
-    
-    //最后一级使用与非门实现pp_out[16:1],而由于最后nand_inv_2xA实际上对应项一定是1故无需进行与非,直接取非输出即可
-    assign      pp_out[16:1]    = ~({nor_A_inv[15],nor_A_inv[15:1]} & nand_inv_2xA);
-    assign      pp_out[0]       = ~nor_A_inv[0]  ;
-
+    //可以复用的信号作为中间变量
+    wire not_code0 ;
+    assign not_code0 = ~code_2bit[0];
     
     
     
+    
+    //定义有关的flag信号,信号的意涵如下
+    //--------------------------------------------
+    //|  pp  |  flag_2x  | flag_s1   |  flag_s2  |
+    //|  A   |     0     |     0     |     1     |
+    //|  -A  |     0     |     1     |     0     |
+    //|  2A  |     1     |     0     |     1     |   
+    //|  -2A |     1     |     1     |     0     |
+    //|  0   |     x     |     0     |     0     |    
+    //---------------------------------------------
+    
+    wire    flag_2x       ;
+    wire    flag_s1       ;
+    wire    flag_s2       ;    
+    
+    assign  flag_2x = not_code0;  //使用非门产生flag_2x
+    assign  flag_s1 = code_2bit[1]; //flag_s1的生成无需新增额外电路资源
+    assign  flag_s2 = ~(code_2bit[1] | not_code0);  //使用或非门实现flag_s2信号生成
+    
+    //产生flag_2xflag信号的取反信号,作为中间变量,实现资源复用
+    wire    flag_not_2x = ~flag_2x;
+    
+    //使用与或非门选择输出的数据本体是A还是-A
+    //当最终部分积为A、2A时,选择A作为数据本体
+    //当最终部分积为-A、-2A时,选择-A作为数据本体
+    //注意:这里输出的数据本体是原来数据按位取反后的结果,例如当数据本体为A时,这里输出的是~A
+    assign pp_source = ~((A  & {16{flag_s2}}) | (inversed_A & {16{flag_s1}}));
+    
+    
+    //通过flag_2x和flag_not_2x信号确定是否需要将数据本体乘以2
+    
+    //输出部分积的最低位(pp_out[0])只在部分积为A和-A时有可能为1,部分积为2A和-2A的情况下下为0
+    //这里需要一个或非门实现pp_out[0]的输出
+    assign pp_out[0] = ~(flag_2x | pp_source[0]);
+    
+    //高位依据flag_2x和flag_not_2x信号来选择是否需要移位,部分积生成的逻辑表达式为
+    //pp_out[i] = flag_2x & (~pp_source[i-1]) + flag_not_2x & ~(pp_source[i])
+    //通过化简逻辑表达式,使用15个与或非门实现pp_out[15:1]
+    assign pp_out[15:1] = ~(({15{flag_2x}} & pp_source[14:0]) | ({15{flag_not_2x}} & pp_source[15:1]));
+    
+    //对于部分积为A和-A的情况,pp_source[16]如果存在,则一定有pp_source[16] = pp_source[15]
+    //即pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[16]) = 
+    // = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]) = ~pp_source[15];
+    //assign pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]);
+    assign pp_out[16] = ~pp_source[15];
 endmodule
