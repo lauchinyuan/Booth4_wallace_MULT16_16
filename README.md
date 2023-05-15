@@ -53,13 +53,13 @@ $$
 
 举例来说，对于一个16bit*16bit有符号数的计算，假设被乘数`B`为16'b1000_1000_1100_1110，乘数`A`为16'b1000_1000_1100_1111，首先对乘数进行分段booth解码，分段解码的过程如图1所示。
 
-![](C:/Users/Lau Chinyuan/Desktop/Huawei/image/booth_decode_example.png)
+![](image/booth_decode_example.png)
 
 <center>图1. Radix-4 Booth算法分段解码过程示例</center>
 
 完成booth分段解码后，依据解码值选择相应的booth部分积操作数，Radix-4 Booth算法的竖式运算示意图如图2所示，图中PP代表部分积(partial product),每个pp的操作数都是17bit，因为`-2A`、`2A`都需要17bit来表示。图1中红色部分代表原始数据左移之后在LSB补的0，绿色部分代表符号位扩展的位置。Radix-4 Booth乘法与传统的竖式乘法相比，每进行一位乘法计算，部分积操作数向左移动两位，而不是一位，这是由于(2)式中，相邻的2的幂次项的指数部分相差2，而在(1)式中指数部分相差1。
 
-![](C:/Users/Lau Chinyuan/Desktop/Huawei/image/booth_mult.png)
+![](image/booth_mult.png)
 
 <center>图1. Radix-4 Booth竖式乘法运算过程示例</center>
 
