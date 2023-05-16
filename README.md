@@ -9,18 +9,18 @@
 #### Radix-4 Booth算法原理
 
 Radix-4 Booth乘数编码算法是一种可以减少部分积项数的算法方案，对于一个n位二进制补码数据`B`，其十进制真实值$B_{D}$为：
-$$
-B_{D}=-1 \times B[n-1] \times 2^{n-1}+\sum_{i=0}^{n-2}B[i] \times 2^i \tag{1}
-$$
+
+$$B_{D}=-1 \times B[n-1] \times 2^{n-1}+\sum_{i=0}^{n-2}B[i] \times 2^i \tag{1}$$
+
 式(1)中， $B[i]$ 代表数据`B`的第i位上的值。
 
 对于本项目乘法器输入的16位乘数,代入式(1)，则乘数可以表示为：
-$$
-\begin{align}
+
+$$\begin{align}
 B_{D} &= -B[15]2^{15}+B[14]2^{14}+ \cdots +B[0]2^{0} \\
 &= (-2B[15]+B[14]+B[13])2^{14} + (-2B[13]+B[12]+B[11])2^{12}+ \cdots + (-2B[1]+B[0]+B[-1])2^{0}\tag{2}
-\end{align}
-$$
+\end{align}$$
+
 被乘数`B`可以使(2)式来表达，其中B[-1]代表补充的乘数`B`的第"-1"位，约定这一位为0。将被乘数数据的相邻的三位比特位`B[i]`、`B[i]`、`B[i-1]`视为一个整体，则(2)式与(1)式相比，将2的幂次项从16个减少到8个，则`A`与`B`相乘后的部分积项数也从16个减少到8个，这有利于减少后面为处理部分积而使用的电路资源开销。
 
 Radix-4 Booth编码与所对应的部分积操作之间的对应关系如表1所示，从表中可知，Radix-4 Booth编码方案对被乘数`A`的操作一共有五大类，即生成`0`、`+A`、`+2A`、`-A`、`-2A`。其中，`0`是确定数`16'h0000` ，`+A`就是乘法器的输入，`+2A`直接由输入的`+A`数据左移一位得到，只需要通过电路资源生成一个`-A`操作数，并将`-A`左移一位即可得到`-2A`，逻辑资源开销较小，适合于硬件电路实现。
@@ -179,21 +179,20 @@ $$ppx[i] = \overline{flag\_2x \cdot pp\_source[i-1] +  \overline{flag\_2x} \cdot
 
 由表达式可知，这一逻辑表达式在`flag_2x`和`！flag_2x`已经得到的情况下，使用”与或非门”即可实现，其电路结构如图所示。
 特别地，对于`ppx[0]`，(3)式可以改写为(4)式，使用一个或非门即可实现该数据的计算。
-$$
-\begin{align}
+
+$$\begin{align}
 ppx[0] &= \overline{\overline{flag\_2x} \cdot pp\_source[0]}\\
 &= \overline{flag\_2x + pp\_source[0]} \tag{4}
-\end{align}
-$$
+\end{align}$$
+
 
 而对于`ppx[16]`，(3)式可以改写为(5)式，由于当`flag_2x`取0时代表无需？？？？？，直接使用一个非门即可实现数据输出。
-$$
-\begin{align}
+
+$$\begin{align}
 ppx[16] &= \overline{flag\_2x \cdot pp\_source[15] +  \overline{flag\_2x} \cdot pp\_source[16]}\\
 &= \overline{flag\_2x \cdot pp\_source[15] +  \overline{flag\_2x} \cdot pp\_source[15]} \\
 &=\overline{pp\_source[15]}\tag{5}
-\end{align}
-$$
+\end{align}$$
 
 ##### booth译码电路设计
 
@@ -226,4 +225,4 @@ $$
 $$
 
 由表5，可以得到三个标志信号的逻辑表达式分别为：
-$$flag\_2x=B_{i+1} \odot B_{i} \tag{i}\\flag\_s1=$$ 
+$$flag\_2x=B_{i+1} \odot B_{i} \tag{i} \\flag\_s1=$$ 
