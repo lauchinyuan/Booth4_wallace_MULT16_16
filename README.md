@@ -179,16 +179,21 @@ $$ppx[i] = \overline{flag\_2x \cdot pp\_source[i-1] +  \overline{flag\_2x} \cdot
 
 由表达式可知，这一逻辑表达式在`flag_2x`和`！flag_2x`已经得到的情况下，使用”与或非门”即可实现，其电路结构如图所示。
 特别地，对于`ppx[0]`，(3)式可以改写为(4)式，使用一个或非门即可实现该数据的计算。
-$$\begin{align}
+$$
+\begin{align}
 ppx[0] &= \overline{\overline{flag\_2x} \cdot pp\_source[0]}\\
 &= \overline{flag\_2x + pp\_source[0]} \tag{4}
-\end{align}$$
+\end{align}
+$$
+
 而对于`ppx[16]`，(3)式可以改写为(5)式，由于当`flag_2x`取0时代表无需？？？？？，直接使用一个非门即可实现数据输出。
-$$\begin{align}
+$$
+\begin{align}
 ppx[16] &= \overline{flag\_2x \cdot pp\_source[15] +  \overline{flag\_2x} \cdot pp\_source[16]}\\
 &= \overline{flag\_2x \cdot pp\_source[15] +  \overline{flag\_2x} \cdot pp\_source[15]} \\
 &=\overline{pp\_source[15]}\tag{5}
-\end{align}$$
+\end{align}
+$$
 
 ##### booth译码电路设计
 
