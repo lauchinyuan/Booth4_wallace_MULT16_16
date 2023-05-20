@@ -7,13 +7,13 @@
 // Description: 基于booth2乘数编码原理和wallace压缩树的16bit*16bit有符号乘法器
 //////////////////////////////////////////////////////////////////////////////////
 module mult_16_16_top(
-        input wire [15:0]   A_NUM   ,   //乘数
-        input wire [15:0]   B_NUM   ,   //被乘数
+        input wire [15:0]   A_NUM   ,   //被乘数
+        input wire [15:0]   B_NUM   ,   //乘数
         
         output wire [31:0]  C_NUM       //积
     );
     
-    //由booth2编码原理生成的部分积
+    //由booth2编码原理生成的部分积原始数据(未进行符号扩展和补零)
     wire [16:0]     PP1     ;
     wire [16:0]     PP2     ;
     wire [16:0]     PP3     ;
