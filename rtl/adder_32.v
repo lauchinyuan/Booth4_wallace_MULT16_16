@@ -89,7 +89,7 @@ module adder_32(
         end
     endgenerate 
     
-    //C[31](最高位)使用异或门生成,相当于不输出进位的全加器,减少资源开销
-    assign C[31] = A[31] ^ B[29] ^ cout_adder_32bit[28];
+    //C[31](最高位)使用同或门生成,A[31]是符号编码保留的1
+    assign C[31] = ~(B[29] ^ cout_adder_32bit[28]);
     
 endmodule
