@@ -27,7 +27,7 @@ module booth2_pp_compressor(
         output wire [29:0] PPout2   //压缩后生成的第二个部分积,低位暂未补零
     );
     
-    //符号位后部分积
+    //符号位编码后的部分积
     wire [18:0] PP1_code;   //经过符号位编码后的PP1，最低位暂不补零
     wire [17:0] PP2_code;   //经过符号位编码后的PP2，最低位暂不补零
     wire [17:0] PP3_code;   
@@ -56,73 +56,25 @@ module booth2_pp_compressor(
     //第二级压缩4:2压缩器的进位连线
     wire [20:0] cout_class2;
     
-    //产生用于符号位编码的符号位取反信号,消耗8个非门资源
-    wire    PP1_s_inv  ;   //部分积1的符号位取反信号 
-    wire    PP2_s_inv  ;   //部分积2的符号位取反信号
-    wire    PP3_s_inv  ;   //部分积3的符号位取反信号
-    wire    PP4_s_inv  ;   //部分积4的符号位取反信号
-    wire    PP5_s_inv  ;   //部分积5的符号位取反信号
-    wire    PP6_s_inv  ;   //部分积6的符号位取反信号
-    wire    PP7_s_inv  ;   //部分积7的符号位取反信号
-    wire    PP8_s_inv  ;   //部分积8的符号位取反信号
+    //产生用于符号位编码的符号位信号,消耗1个非门资源
+    wire    PP1_s  ;   
     
-/*     wire    [31:0] PP1_FULL;
-    wire    [31:0] PP2_FULL;
-    wire    [31:0] PP3_FULL;
-    wire    [31:0] PP4_FULL;
-    wire    [31:0] PP5_FULL;
-    wire    [31:0] PP6_FULL;
-    wire    [31:0] PP7_FULL;
-    wire    [31:0] PP8_FULL; 
-    
-    
-    wire    [31:0] PPC1_1_FULL;
-    wire    [31:0] PPC1_2_FULL;
-    wire    [31:0] PPC1_3_FULL;
-    wire    [31:0] PPC1_4_FULL; */
-    
-    
-    assign  PP1_s_inv = ~PP1[16];
-    assign  PP2_s_inv = ~PP2[16];
-    assign  PP3_s_inv = ~PP3[16];
-    assign  PP4_s_inv = ~PP4[16];
-    assign  PP5_s_inv = ~PP5[16];
-    assign  PP6_s_inv = ~PP6[16];
-    assign  PP7_s_inv = ~PP7[16];
-    assign  PP8_s_inv = ~PP8[16];
+    //部分积1的真实符号位,因为部分积生成模块booth2_pp_gen生成的PPX的"符号位"是反逻辑
+    assign  PP1_s = ~PP1[16];
     
     //对部分积进行符号位编码
     
-    assign PP1_code = {PP1_s_inv,{1{PP1[16]}},PP1};
-    assign PP2_code = {1'b1,PP2_s_inv,PP2[15:0]};
-    assign PP3_code = {1'b1,PP3_s_inv,PP3[15:0]};
-    assign PP4_code = {1'b1,PP4_s_inv,PP4[15:0]};   
-    assign PP5_code = {1'b1,PP5_s_inv,PP5[15:0]};
-    assign PP6_code = {1'b1,PP6_s_inv,PP6[15:0]};    
-    assign PP7_code = {1'b1,PP7_s_inv,PP7[15:0]};
-    assign PP8_code = {1'b1,PP8_s_inv,PP8[15:0]};
+    assign PP1_code = {PP1[16],{2{PP1_s}},PP1[15:0]};
+    assign PP2_code = {1'b1,PP2};
+    assign PP3_code = {1'b1,PP3};
+    assign PP4_code = {1'b1,PP4};   
+    assign PP5_code = {1'b1,PP5};
+    assign PP6_code = {1'b1,PP6};    
+    assign PP7_code = {1'b1,PP7};
+    assign PP8_code = {1'b1,PP8};
     
     
     
-    
-/*     assign PP1_FULL = PP1_code;
-    assign PP2_FULL = {PP2_code,2'b0};
-    assign PP3_FULL = {PP3_code,4'b0};
-    assign PP4_FULL = {PP4_code,6'b0};
-    assign PP5_FULL = {PP5_code,8'b0};
-    assign PP6_FULL = {PP6_code,10'b0};
-    assign PP7_FULL = {PP7_code,12'b0};
-    assign PP8_FULL = {PP8_code,14'b0}; 
-    
-    assign PPC1_1_FULL = {PPC1_1};
-    assign PPC1_2_FULL = {PPC1_2,2'b0};
-    assign PPC1_3_FULL = {PPC1_3,8'b0};
-    assign PPC1_4_FULL = {PPC1_4,10'b0}; */
-    
-/*     assign PPC1_1_FULL = {PPC1_1};
-    assign PPC1_2_FULL = {PPC1_2,2'b0};
-    assign PPC1_3_FULL = {PPC1_3,8'b0};
-    assign PPC1_4_FULL = {PPC1_4,10'b0}; */
     
     /**************************************第一级第一次压缩*******************************/
     

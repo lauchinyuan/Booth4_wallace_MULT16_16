@@ -11,7 +11,7 @@ module booth2_pp_decoder(
         input wire  [15:0]      A           ,  //被乘数A
         input wire  [15:0]      inversed_A  ,  //取反后的被乘数(-A)
         
-        output wire [16:0]      pp_out         //输出的部分积,输出17bit
+        output wire [16:0]      pp_out         //输出的部分积,输出17bit,注意pp_out[16]是反逻辑的
     );
     
     wire [15:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
@@ -65,7 +65,7 @@ module booth2_pp_decoder(
     //对于部分积为A和-A的情况,pp_source[16]如果存在,则一定有pp_source[16] = pp_source[15]
     //即pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[16]) = 
     // = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]) = ~pp_source[15];
-    //assign pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]);
-    assign pp_out[16] = ~pp_source[15];
+    //这里取相反的逻辑,因为对于PP2-PP8,采用本文所用到的符号位编码方案,则原来符号位的位置变成了符号位取反
+    assign pp_out[16] = pp_source[15];
     
 endmodule

@@ -68,6 +68,7 @@ module booth2_pp_decoder_pp1(
     //对于部分积为A和-A的情况,pp_source[16]如果存在,则一定有pp_source[16] = pp_source[15]
     //即pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[16]) = 
     // = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]) = ~pp_source[15];
-    //assign pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]);
-    assign pp_out[16] = ~pp_source[15];
+    
+    //最高位是反逻辑”符号位“,0代表负数,1代表正数
+    assign pp_out[16] = pp_source[15];
 endmodule
