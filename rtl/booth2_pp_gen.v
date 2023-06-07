@@ -11,15 +11,15 @@ module booth2_pp_gen(
         input wire [15:0]   B_NUM   ,   //乘数
         
         //注意:这里产生的部分积并未进行补零操作
-        //部分积的最大长度为17位
-        output wire [16:0]  PP1     ,
-        output wire [16:0]  PP2     ,
-        output wire [16:0]  PP3     ,
-        output wire [16:0]  PP4     ,
-        output wire [16:0]  PP5     ,
-        output wire [16:0]  PP6     ,
-        output wire [16:0]  PP7     ,
-        output wire [16:0]  PP8     
+        //部分积的最大长度为18位
+        output wire [17:0]  PP1     ,
+        output wire [17:0]  PP2     ,
+        output wire [17:0]  PP3     ,
+        output wire [17:0]  PP4     ,
+        output wire [17:0]  PP5     ,
+        output wire [17:0]  PP6     ,
+        output wire [17:0]  PP7     ,
+        output wire [17:0]  PP8     
     );
     //用于产生8个部分积的编码
     wire [2:0]  B_code1 ;
@@ -32,7 +32,7 @@ module booth2_pp_gen(
     wire [2:0]  B_code8 ;
     
     //部分积由-1*A
-    wire [15:0] inversed_A  ;//-1*A
+    wire [16:0] inversed_A  ;//-1*A
     
     
     //产生-1*A,使用专用的电路,而不使用加法器,减少资源开销
@@ -62,14 +62,7 @@ module booth2_pp_gen(
 
         .pp_out      (PP1        )   //输出的部分积,输出17bit
     );
-/*     //PP1
-    booth2_pp_decoder booth2_pp_decoder_pp1(
-        .code       (B_code1            ),  //输入的3bit编码
-        .A          (A_NUM              ),  //被乘数A
-        .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP1                )   //输出的部分积,输出17bit
-    ); */
 
     //PP2
     booth2_pp_decoder booth2_pp_decoder_pp2(
@@ -133,182 +126,6 @@ module booth2_pp_gen(
 
         .pp_out     (PP8                )   //输出的部分积,输出17bit
     );
-    
-/*  //PP1
-    always @ (*) begin
-        case(B_code1) 
-            3'b000,3'b111: begin
-                PP1 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP1 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP1 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP1 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP1 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-
-    //PP2
-    always @ (*) begin
-        case(B_code2) 
-            3'b000,3'b111: begin
-                PP2 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP2 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP2 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP2 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP2 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-    
-    //PP3
-    always @ (*) begin
-        case(B_code3) 
-            3'b000,3'b111: begin
-                PP3 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP3 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP3 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP3 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP3 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-
-    //PP4
-    always @ (*) begin
-        case(B_code4) 
-            3'b000,3'b111: begin
-                PP4 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP4 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP4 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP4 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP4 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-    
-    //PP5
-    always @ (*) begin
-        case(B_code5) 
-            3'b000,3'b111: begin
-                PP5 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP5 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP5 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP5 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP5 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-
-    //PP6
-    always @ (*) begin
-        case(B_code6) 
-            3'b000,3'b111: begin
-                PP6 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP6 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP6 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP6 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP6 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-
-    //PP7
-    always @ (*) begin
-        case(B_code7) 
-            3'b000,3'b111: begin
-                PP7 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP7 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP7 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP7 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP7 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end
-    
-    //PP8
-    always @ (*) begin
-        case(B_code8) 
-            3'b000,3'b111: begin
-                PP8 = 17'b0;
-            end
-            3'b001,3'b010: begin
-                PP8 = {A_NUM[15],A_NUM};  //A
-            end
-            3'b011: begin
-                PP8 = {A_NUM, 1'b0};  //2A
-            end
-            3'b100: begin
-                PP8 = inversed_Ax2;  //-2A
-            end
-            default: begin  //3'b101,3'b110
-                //符号位扩展
-                PP8 = {inversed_A[15], inversed_A}; //-A
-            end 
-        endcase
-    end */
     
     
 endmodule

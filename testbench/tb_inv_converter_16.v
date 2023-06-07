@@ -10,13 +10,14 @@ module tb_inv_converter_16(
 
     );
     reg [15:0]      data_i  ;
-    wire[15:0]      inv_o   ;
+    wire[16:0]      inv_o   ;
     
     integer i;
     initial begin
-        for(i=0;i<=50;i=i+1) begin
+        data_i <= 16'h8000; //测试补码表示的下界是否能正常生成相反数
+        for(i=0;i<=65536;i=i+1) begin
             #20
-            data_i = $random;
+            data_i <= $random;
         end
     
     end

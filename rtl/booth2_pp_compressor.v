@@ -14,34 +14,34 @@ module booth2_pp_compressor(
         //PP1为booth2乘数编码最低位与被乘数相乘而产生的
         //PP8为booth2乘数编码最高位与被乘数相乘而产生的
         //即PP1为做竖式乘法运算由上往下第一行
-        input wire [16:0] PP1   ,
-        input wire [16:0] PP2   ,   
-        input wire [16:0] PP3   ,
-        input wire [16:0] PP4   ,
-        input wire [16:0] PP5   ,
-        input wire [16:0] PP6   ,
-        input wire [16:0] PP7   ,
-        input wire [16:0] PP8   ,
+        input wire [17:0] PP1   ,
+        input wire [17:0] PP2   ,   
+        input wire [17:0] PP3   ,
+        input wire [17:0] PP4   ,
+        input wire [17:0] PP5   ,
+        input wire [17:0] PP6   ,
+        input wire [17:0] PP7   ,
+        input wire [17:0] PP8   ,
 
         output wire [31:0] PPout1,  //压缩后生成的第一个部分积
         output wire [29:0] PPout2   //压缩后生成的第二个部分积,低位暂未补零
     );
     
     //符号位编码后的部分积
-    wire [18:0] PP1_code;   //经过符号位编码后的PP1，最低位暂不补零
-    wire [17:0] PP2_code;   //经过符号位编码后的PP2，最低位暂不补零
-    wire [17:0] PP3_code;   
-    wire [17:0] PP4_code;
-    wire [17:0] PP5_code;
-    wire [17:0] PP6_code;
-    wire [17:0] PP7_code;
-    wire [17:0] PP8_code;                                                   
+    wire [19:0] PP1_code;   //经过符号位编码后的PP1，最低位暂不补零
+    wire [18:0] PP2_code;   //经过符号位编码后的PP2，最低位暂不补零
+    wire [18:0] PP3_code;   
+    wire [18:0] PP4_code;
+    wire [18:0] PP5_code;
+    wire [18:0] PP6_code;
+    wire [18:0] PP7_code;
+    wire [18:0] PP8_code;                                                   
 
 
     //第一次压缩产生的部分积
-    wire [22:0] PPC1_1;  //第一级压缩产生的部分积1
-    wire [21:0] PPC1_2; //第一级压缩产生的部分积2,低位暂未补零
-    wire [22:0] PPC1_3; //第一级压缩产生的部分积3,低位暂未补零
+    wire [23:0] PPC1_1;  //第一级压缩产生的部分积1
+    wire [22:0] PPC1_2; //第一级压缩产生的部分积2,低位暂未补零
+    wire [23:0] PPC1_3; //第一级压缩产生的部分积3,低位暂未补零
     wire [21:0] PPC1_4; //第一级压缩产生的部分积4,低位暂未补零
     
     wire [31:0] PPC2_1;//第二级压缩产生的部分积1
@@ -60,11 +60,59 @@ module booth2_pp_compressor(
     wire    PP1_s  ;   
     
     //部分积1的真实符号位,因为部分积生成模块booth2_pp_gen生成的PPX的"符号位"是反逻辑
-    assign  PP1_s = ~PP1[16];
+    assign  PP1_s = ~PP1[17];
+    
+    
+    
+    //test
+    wire [31:0] sum_test2;
+    wire [31:0] sum_test1;
+    wire [31:0] sum_test3;
+        wire [19:0] PP1_full;  //符号编码缩进
+    wire [20:0] PP2_full;
+    wire [22:0] PP3_full;
+    wire [24:0] PP4_full;
+    wire [26:0] PP5_full;
+    wire [28:0] PP6_full;
+    wire [30:0] PP7_full;
+    wire [32:0] PP8_full;
+    
+    wire [23:0] PPC1_1_full;
+    wire [24:0] PPC1_2_full;
+    wire [31:0] PPC1_3_full;
+    wire [31:0] PPC1_4_full;
+    wire [31:0] PPC2_2_full;
+    
+    assign PPC1_1_full = PPC1_1;
+    assign PPC1_2_full = {PPC1_2,2'b0};
+    assign PPC1_3_full = {PPC1_3,8'b0};
+    assign PPC1_4_full = {PPC1_4,10'b0};
+    assign PPC2_2_full = {PPC2_2,2'b0};
+    
+    assign sum_test1 = PP1_full+PP2_full+PP3_full+PP4_full+PP5_full+PP6_full+PP7_full+PP8_full;   
+    assign sum_test2 = PPC1_1_full + PPC1_2_full + PPC1_3_full + PPC1_4_full;
+    assign sum_test3 = PPC2_1 + PPC2_2_full;
+    
+    
+    
+      assign PP1_full = PP1_code;
+    assign PP2_full = {PP2_code,2'b0};
+    assign PP3_full = {PP3_code,4'b0};
+    assign PP4_full = {PP4_code,6'b0};
+    assign PP5_full = {PP5_code,8'b0};
+    assign PP6_full = {PP6_code,10'b0};
+    assign PP7_full = {PP7_code,12'b0};
+    assign PP8_full = {PP8_code,14'b0};  
+    
+    
+   
+   
+   
+   
     
     //对部分积进行符号位编码
     
-    assign PP1_code = {PP1[16],{2{PP1_s}},PP1[15:0]};
+    assign PP1_code = {PP1[17],{2{PP1_s}},PP1[16:0]};
     assign PP2_code = {1'b1,PP2};
     assign PP3_code = {1'b1,PP3};
     assign PP4_code = {1'b1,PP4};   
@@ -72,7 +120,6 @@ module booth2_pp_compressor(
     assign PP6_code = {1'b1,PP6};    
     assign PP7_code = {1'b1,PP7};
     assign PP8_code = {1'b1,PP8};
-    
     
     
     
@@ -107,7 +154,7 @@ module booth2_pp_compressor(
     
     //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)的第i个4:2压缩器
     generate 
-        for(i=7;i<=18;i=i+1) begin: compressor_4_2_class1_ppc12_inst
+        for(i=7;i<=19;i=i+1) begin: compressor_4_2_class1_ppc12_inst
             compressor_4_2 compressor_4_2_class1_ppc12_i (
                     .i0 (PP1_code[i]),
                     .i1 (PP2_code[i-2]),
@@ -122,40 +169,40 @@ module booth2_pp_compressor(
         end
     endgenerate  
     
-    //PP2_code[17]一定是1,PP1_code[19]不存在数值
+    //PP2_code[18]一定是1,PP1_code[20]不存在数值
     //相当于这一级使用的4:2压缩器两个输入分别确定是0和1
     //使用有两个输入分别确定是0和1的4:2压缩器,节省资源开销
     in_0_1_compressor_4_2 in_0_1_compressor_4_2_class1_ppc12_19(
-            .i1   (PP3_code[15]   ),
-            .i3   (PP4_code[13]   ),
-            .ci   (cout_class1_ppc12[12]),
+            .i1   (PP3_code[16]   ),
+            .i3   (PP4_code[14]   ),
+            .ci   (cout_class1_ppc12[13]),
 
-            .co  (cout_class1_ppc12[13]),
-            .c   (PPC1_2[18]),
-            .d   (PPC1_1[19])
+            .co  (cout_class1_ppc12[14]),
+            .c   (PPC1_2[19]),
+            .d   (PPC1_1[20])
     );    
     
-    //PP3_code[16]所在的同一权位,在产生4:2压缩时,只有三个有效输入
+    //PP3_code[17]所在的同一权位,在产生4:2压缩时,只有三个有效输入
     //使用3:2压缩器即可
     compressor_3_2 compressor_3_2_class1_ppc12_20(
-        .i0      (PP3_code[16]),
-        .i1      (PP4_code[14]),
-        .ci      (cout_class1_ppc12[13]),
+        .i0      (PP3_code[17]),
+        .i1      (PP4_code[15]),
+        .ci      (cout_class1_ppc12[14]),
 
-        .co      (PPC1_2[19]),
-        .d       (PPC1_1[20])
+        .co      (PPC1_2[20]),
+        .d       (PPC1_1[21])
     );
     
-    //PP3_code[17]一定是1,而在同一权值的PP1_code[21]和PP2_code[19]都不存在,相当于是0
-    //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP4_code[15]
-    //则PPC1_1[21] = ~PP4_code[15]; PPC1_2[20] = PP4_code[15]
-    assign PPC1_1[21] = ~PP4_code[15];
-    assign PPC1_2[20] = PP4_code[15];
+    //PP3_code[18]一定是1,而在同一权值的PP1_code[22]和PP2_code[20]都不存在,相当于是0
+    //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP4_code[16]
+    //则PPC1_1[22] = ~PP4_code[16]; PPC1_2[21] = PP4_code[16]
+    assign PPC1_1[22] = ~PP4_code[16];
+    assign PPC1_2[21] = PP4_code[16];
     
     //最高位和最低位部分本来就是两个部分积,不用处理,直接连续赋值(接线)
-    assign PPC1_1[22]   = PP4_code[16]      ;
+    assign PPC1_1[23]   = PP4_code[17]      ;
     assign PPC1_1[3:0]  = PP1_code[3:0]     ; 
-    assign PPC1_2[21]   = PP4_code[17]      ;
+    assign PPC1_2[22]   = PP4_code[18]      ;
     assign PPC1_2[1:0]  = PP2_code[1:0]     ;
     assign PPC1_2[2]    = 1'b0  ;           //第一次使用3:2压缩器的位置，进位部分积没有进位
     
@@ -193,7 +240,7 @@ module booth2_pp_compressor(
 
     //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)的第i个4:2压缩器
     generate 
-        for(i=7;i<=16;i=i+1) begin: compressor_4_2_class1_ppc34_inst
+        for(i=7;i<=17;i=i+1) begin: compressor_4_2_class1_ppc34_inst
             compressor_4_2 compressor_4_2_class1_ppc34_i (
                     .i0 (PP5_code[i]),
                     .i1 (PP6_code[i-2]),
@@ -208,65 +255,64 @@ module booth2_pp_compressor(
         end
     endgenerate 
 
-    //PP5_code[17]一定是1,则产生PPC1_4[16]和PPC1_3[17]的4:2压缩器可以使用一个确定输入为1的4:2压缩器变式
+    //PP5_code[18]一定是1,则产生PPC1_4[17]和PPC1_3[18]的4:2压缩器可以使用一个确定输入为1的4:2压缩器变式
     //这一变式器件并不延长进位链
     in_1_compressor_4_2 compressor_4_2_class1_ppc34_17(
-        .i0  (PP6_code[15]),
-        .i1  (PP7_code[13]),
-        .i3  (PP8_code[11]),
-        .ci  (cout_class1_ppc34[10]),
+        .i0  (PP6_code[16]),
+        .i1  (PP7_code[14]),
+        .i3  (PP8_code[12]),
+        .ci  (cout_class1_ppc34[11]),
 
-        .co  (cout_class1_ppc34[11]),
-        .c   (PPC1_4[16]),
-        .d   (PPC1_3[17])
+        .co  (cout_class1_ppc34[12]),
+        .c   (PPC1_4[17]),
+        .d   (PPC1_3[18])
     );
     
-    //PP5_code[18]一定是0,则产生PPC1_4[17]和PPC1_3[18]的4:2压缩器可以使用一个确定输入为0的4:2压缩器变式
+    //PP5_code[19]一定是0,则产生PPC1_4[18]和PPC1_3[19]的4:2压缩器可以使用一个确定输入为0的4:2压缩器变式
     //这一变式器件并不延长进位链
     in_0_compressor_4_2 compressor_4_2_class1_ppc34_18(
-            .i1   (PP6_code[16]),
-            .i2   (PP7_code[14]),
-            .i3   (PP8_code[12]),
-            .ci   (cout_class1_ppc34[11]),
+            .i1   (PP6_code[17]),
+            .i2   (PP7_code[15]),
+            .i3   (PP8_code[13]),
+            .ci   (cout_class1_ppc34[12]),
 
-            .co   (cout_class1_ppc34[12]),
-            .c    (PPC1_4[17]),
-            .d    (PPC1_3[18])
+            .co   (cout_class1_ppc34[13]),
+            .c    (PPC1_4[18]),
+            .d    (PPC1_3[19])
     
         );  
 
-    //PP5_code[19]一定是0,PP6_code[17]一定是1,则产生PPC1_4[18]和PPC1_3[19]的4:2压缩器可以使用确定输入为0和1的4:2压缩器变式
+    //PP5_code[20]一定是0,PP6_code[18]一定是1,则产生PPC1_4[19]和PPC1_3[20]的4:2压缩器可以使用确定输入为0和1的4:2压缩器变式
     //这一变式器件并不延长进位链  
     in_0_1_compressor_4_2 compressor_4_2_class1_ppc34_19(
-            .i1   (PP7_code[15]   ),
-            .i3   (PP8_code[13]   ),
-            .ci   (cout_class1_ppc34[12]),
+            .i1   (PP7_code[16]   ),
+            .i3   (PP8_code[14]   ),
+            .ci   (cout_class1_ppc34[13]),
 
-            .co  (cout_class1_ppc34[13]),
-            .c   (PPC1_4[18]),
-            .d   (PPC1_3[19])
+            .co  (cout_class1_ppc34[14]),
+            .c   (PPC1_4[19]),
+            .d   (PPC1_3[20])
     ); 
  
-    //PP7_code[17]所在的同一权位,在产生4:2压缩时,只有三个有效输入
+    //PP7_code[18]所在的同一权位,在产生4:2压缩时,只有三个有效输入
     //使用3:2压缩器即可
     compressor_3_2 compressor_3_2_class1_ppc34_20(
-        .i0      (PP7_code[16]),
-        .i1      (PP8_code[14]),
-        .ci      (cout_class1_ppc34[13]),
+        .i0      (PP7_code[17]),
+        .i1      (PP8_code[15]),
+        .ci      (cout_class1_ppc34[14]),
 
-        .co      (PPC1_4[19]),
-        .d       (PPC1_3[20])
+        .co      (PPC1_4[20]),
+        .d       (PPC1_3[21])
     ); 
 
     //PP7_code[17]一定是1,而在同一权值的PP5_code[21]和PP6_code[19]都不存在,相当于是0
     //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP4_code[15]
     //则PPC1_1[21] = ~PP4_code[15]; PPC1_2[20] = PP4_code[15]
-    assign PPC1_3[21] = ~PP8_code[15];
-    assign PPC1_4[20] = PP8_code[15];
+    assign PPC1_3[22] = ~PP8_code[16];
+    assign PPC1_4[21] = PP8_code[16];
     
     //最高位和最低位部分本来就是两个部分积,不用处理,直接连续赋值(接线)
-    assign PPC1_3[22]   = PP8_code[16]      ;
-    assign PPC1_4[21]   = PP8_code[17]      ;
+    assign PPC1_3[23]   = PP8_code[17]      ;
     assign PPC1_3[3:0]  = PP5_code[3:0]     ; 
     assign PPC1_4[1:0]  = PP6_code[1:0]     ;
     assign PPC1_4[2]    = 1'b0              ; //第一次使用3:2压缩器的位置，进位部分积没有进位  
@@ -332,7 +378,7 @@ module booth2_pp_compressor(
     
     //第二级压缩产生部分积1(PPC2_1)和部分积2(PPC2_2)的第i个4:2压缩器
     generate 
-        for(i=13;i<=22;i=i+1) begin: compressor_4_2_class2_ppc12_inst
+        for(i=13;i<=23;i=i+1) begin: compressor_4_2_class2_ppc12_inst
             compressor_4_2 compressor_4_2_class2_i (
                     .i0 (PPC1_1[i]),
                     .i1 (PPC1_2[i-2]),
@@ -347,33 +393,33 @@ module booth2_pp_compressor(
         end
     endgenerate
     
-    //PPC1_1[23]一定是0,PPC1_2[21]一定是1,则产生PPC2_1[23]和PPC2_2[22]的4:2压缩器可以使用确定输入为0和1的4:2压缩器变式
+    //PPC1_1[24]一定是0,PPC1_2[22]一定是1,则产生PPC2_1[24]和PPC2_2[23]的4:2压缩器可以使用确定输入为0和1的4:2压缩器变式
     //这一变式器件并不延长进位链  
     in_0_1_compressor_4_2 compressor_4_2_class2_23(
-            .i1   (PPC1_3[15]   ),
-            .i3   (PPC1_4[13]   ),
-            .ci   (cout_class2[12]),
+            .i1   (PPC1_3[16]   ),
+            .i3   (PPC1_4[14]   ),
+            .ci   (cout_class2[13]),
 
-            .co  (cout_class2[13]),
-            .c   (PPC2_2[22]),
-            .d   (PPC2_1[23])
+            .co  (cout_class2[14]),
+            .c   (PPC2_2[23]),
+            .d   (PPC2_1[24])
     ); 
     
-    //PPC1_3[16]所在的同一权位,在产生4:2压缩时,只有三个有效输入
+    //PPC1_3[17]所在的同一权位,在产生4:2压缩时,只有三个有效输入
     //使用3:2压缩器即可,会产生进位链
     compressor_3_2 compressor_4_2_class2_24(
-        .i0      (PPC1_3[16]),
-        .i1      (PPC1_4[14]),
-        .ci      (cout_class2[13]),
+        .i0      (PPC1_3[17]),
+        .i1      (PPC1_4[15]),
+        .ci      (cout_class2[14]),
 
-        .co      (PPC2_2[23]),
-        .d       (PPC2_1[24])
+        .co      (PPC2_2[24]),
+        .d       (PPC2_1[25])
     ); 
     
     //PPC1_3[18]所在的同一权位,在产生4:2压缩时,只有两个有效输入
     //不会产生进位链 
     generate
-        for(i=25;i<=30;i=i+1) begin: compressor_4_2_class2_half_adder_inst
+        for(i=26;i<=30;i=i+1) begin: compressor_4_2_class2_half_adder_inst
             half_adder compressor_4_2_class2_half_adder_i(
                 .a   (PPC1_3[i-8]),
                 .b   (PPC1_4[i-10]),
@@ -384,8 +430,8 @@ module booth2_pp_compressor(
         end
     endgenerate
     
-    //PPC2_1的最高位就是PPC1_4的最高位,其实就是0
-    assign PPC2_1[31] = PPC1_4[21];
+    //PPC2_1的最高位就是PPC1_4的最高位和PPC1_3的最高位的异或
+    assign PPC2_1[31] = PPC1_4[21] ^ PPC1_3[23];
     
     //补全部分积1(PPC2_1)和部分积2(PPC2_2)没有用到压缩的位置
     //没有变化的位置

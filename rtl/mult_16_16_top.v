@@ -14,14 +14,14 @@ module mult_16_16_top(
     );
     
     //由booth2编码原理生成的部分积原始数据(未进行符号扩展和补零)
-    wire [16:0]     PP1     ;
-    wire [16:0]     PP2     ;
-    wire [16:0]     PP3     ;
-    wire [16:0]     PP4     ;
-    wire [16:0]     PP5     ;
-    wire [16:0]     PP6     ;
-    wire [16:0]     PP7     ;
-    wire [16:0]     PP8     ;
+    wire [17:0]     PP1     ;
+    wire [17:0]     PP2     ;
+    wire [17:0]     PP3     ;
+    wire [17:0]     PP4     ;
+    wire [17:0]     PP5     ;
+    wire [17:0]     PP6     ;
+    wire [17:0]     PP7     ;
+    wire [17:0]     PP8     ;
     
     //经过wallace算法压缩后输出的两个部分积
     //不包括最高位符号位,因为最高位符号位直接用输入数据的异或门计算

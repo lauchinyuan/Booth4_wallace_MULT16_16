@@ -9,18 +9,16 @@
 module booth2_pp_decoder(
         input wire  [2:0]       code        ,  //输入的3bit编码
         input wire  [15:0]      A           ,  //被乘数A
-        input wire  [15:0]      inversed_A  ,  //取反后的被乘数(-A)
+        input wire  [16:0]      inversed_A  ,  //取反后的被乘数(-A)
         
-        output wire [16:0]      pp_out         //输出的部分积,输出17bit,注意pp_out[16]是反逻辑的
+        output wire [17:0]      pp_out         //输出的部分积,输出18bit,注意pp_out[16]是反逻辑的
     );
     
-    wire [15:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
+    wire [16:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
     
     //可以复用的信号作为中间变量
     wire not_code2 ;
     assign not_code2 = ~code[2];
-    
-    
     
     
     //定义有关的flag信号,信号的意涵如下
@@ -48,7 +46,7 @@ module booth2_pp_decoder(
     //当最终部分积为A、2A时,选择A作为数据本体
     //当最终部分积为-A、-2A时,选择-A作为数据本体
     //注意:这里输出的数据本体是原来数据按位取反后的结果,例如当数据本体为A时,这里输出的是~A
-    assign pp_source = ~((A  & {16{flag_s2}}) | (inversed_A & {16{flag_s1}}));
+    assign pp_source = ~(({{A[15]}, A}  & {17{flag_s2}}) | (inversed_A & {17{flag_s1}}));
     
     
     //通过flag_2x和flag_not_2x信号确定是否需要将数据本体乘以2
@@ -59,13 +57,16 @@ module booth2_pp_decoder(
     
     //高位依据flag_2x和flag_not_2x信号来选择是否需要移位,部分积生成的逻辑表达式为
     //pp_out[i] = flag_2x & (~pp_source[i-1]) + flag_not_2x & ~(pp_source[i])
-    //通过化简逻辑表达式,使用15个与或非门实现pp_out[15:1]
-    assign pp_out[15:1] = ~(({15{flag_2x}} & pp_source[14:0]) | ({15{flag_not_2x}} & pp_source[15:1]));
+    //通过化简逻辑表达式,使用16个与或非门实现pp_out[15:1]
+    assign pp_out[16:1] = ~(({16{flag_2x}} & pp_source[15:0]) | ({16{flag_not_2x}} & pp_source[16:1]));
     
     //对于部分积为A和-A的情况,pp_source[16]如果存在,则一定有pp_source[16] = pp_source[15]
     //即pp_out[16] = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[16]) = 
     // = ~(flag_2x & pp_source[15] + flag_not_2x & pp_source[15]) = ~pp_source[15];
-    //这里取相反的逻辑,因为对于PP2-PP8,采用本文所用到的符号位编码方案,则原来符号位的位置变成了符号位取反
-    assign pp_out[16] = pp_source[15];
+    
+    
+    //这里取相反的逻辑,因为对于PP2-PP8,原来符号位的位置变成了符号位取反
+    //这一操作可以节省非门的使用
+    assign pp_out[17] = pp_source[16];
     
 endmodule

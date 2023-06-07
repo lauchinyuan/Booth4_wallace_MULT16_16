@@ -12,19 +12,21 @@ module tb_mult_16_16_top();
     wire signed [31:0]  C_NUM_real;  //计算结果的真实值
     wire                correct ;    //计算结果正确标志
     
-    
-    integer i;
+    //遍历所有可能的输入情况
+    //16bit有符号数的范围为[-32768,32767]
+    integer i,j;
     initial begin
-        A_NUM <= 16'h3524;  
-        B_NUM <= 16'h5e81;  
-    #20
-        for(i=0;i<=100000;i=i+1) begin
-            #20
-            A_NUM = $random;
-            B_NUM = $random;
-            
+        //初始值给定一个随机数
+        A_NUM <= $random;
+        B_NUM <= $random;
+        //遍历一轮数据需要操作进行(2^16 - 1)=65535次自增1运算
+        for(i=0;i<65535;i=i+1) begin
+            A_NUM <= i - 16'd32768; //A_NUM从-32768开始自增
+            for(j=0;j<65535;j=j+1) begin
+                #20
+                B_NUM <= j - 16'd32768; //B_NUM从-32768开始自增
+            end
         end
-        
     end
     
     //正确结果
@@ -33,7 +35,7 @@ module tb_mult_16_16_top();
     //计算结果正确标志
     assign correct = (C_NUM_real == C_NUM);
     
-
+    //模块例化
     mult_16_16_top mult_16_16_top_inst(
         .A_NUM  (A_NUM),    //乘数
         .B_NUM  (B_NUM),    //被乘数
