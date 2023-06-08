@@ -26,7 +26,7 @@ module tb_compressor_3_2(
         {i1, i0} = 2'b11;   
     end
 
-    compressor_3_2 compressor_3_2_inst(
+    topmodule compressor_3_2_inst(
         .i0 (i0 ),
         .i1 (i1 ),
         .ci (ci ),

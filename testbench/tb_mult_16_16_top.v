@@ -20,11 +20,13 @@ module tb_mult_16_16_top();
         A_NUM <= $random;
         B_NUM <= $random;
         //遍历一轮数据需要操作进行(2^16 - 1)=65535次自增1运算
-        for(i=0;i<65535;i=i+1) begin
-            A_NUM <= i - 16'd32768; //A_NUM从-32768开始自增
-            for(j=0;j<65535;j=j+1) begin
+        for(i=0;i<=65535;i=i+1) begin
+            for(j=0;j<=65535;j=j+1) begin
+                //延时放在语句后面,使得A_NUM和B_NUM能同时变化
                 #20
+                A_NUM <= i - 16'd32768; //A_NUM从-32768开始自增
                 B_NUM <= j - 16'd32768; //B_NUM从-32768开始自增
+                
             end
         end
     end
