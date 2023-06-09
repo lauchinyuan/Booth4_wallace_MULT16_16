@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Create Date: 2023/04/09 19:53:30
 // Module Name: half_adder
-//              实现了原本半加器中的异或门结构,使得异或门内部的信号可以复用
+//              使用门电路实现了"异或门"结构,使得"异或门"内部的信号可以复用
 //              减少了MOS管的使用量
 //////////////////////////////////////////////////////////////////////////////////
 module half_adder(
@@ -14,14 +14,15 @@ module half_adder(
     );
     
     //中间数据(连线),部分数据可以实现复用
-    wire a_nand_b       ;   //a和b与非的结果
-    wire AOI_o          ;   //与或非门输出的结果
+    wire a_nor_b        ;   //a和b或非的结果,构成"异或门"中间数据
+    wire a_and_b        ;   //a和b相与的结果,构成"异或门"中间数据,也是cout输出
     
-    assign a_nand_b = ~(a & b);    //与非门
-    assign AOI_o    = ~((a_nand_b & a) | (a_nand_b & b)); //与或非门
+    assign a_and_b = a & b;    //与门
+    assign a_nor_b = ~(a | b); //或非门
+   
     
     //模块输出
-    assign cout     = ~a_nand_b;
-    assign sum      = ~AOI_o;
+    assign cout     = a_and_b;
+    assign sum      = ~(a_nor_b | a_and_b);
     
 endmodule
