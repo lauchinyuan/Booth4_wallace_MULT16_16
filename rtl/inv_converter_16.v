@@ -20,31 +20,32 @@ module inv_converter_16(
     //按位取反再加一,最低位不变
     assign inv_o[0] = data_i[0];
     
-    //inv_o[15:1]位由14半加器级联产生
-    //第一个半加器,两个输入都是原来数据取反后的数据,可以使用inv_half_adder模块,节省电路资源
-    inv_half_adder inv_half_adder_bit1 (
-            .inv_a  (data_i[1]      ),  //本权值数据
-            .inv_b  (data_i[0]      ),  //来自上一级的进位输入
+    //第一个取反单元inv_unit
+    inv_unit inv_unit_bit1(
+        .a       (data_i[1]     ),
+        .b       (data_i[0]     ),
 
-            .cout   (wire_cout[0]   ),
-            .sum    (inv_o[1]       )
-        );   
+        .xor_o   (inv_o[1]      ),  //异或输出,作为本权值位的输出数据
+        .or_o    (wire_cout[0]  )   //或输出,作为下一级单元的输出
+    );
+    
+    
 
-    //中间位置的半加器使用有一个端口为数据取反的半加器(single_inv_half_adder)
+    //中间位置的取反单元inv_unit
     genvar i;
     generate 
         for(i=2;i<=15;i=i+1) begin
-            single_inv_half_adder single_inv_half_adder_inst (
-                    .inv_a  (data_i[i]      ),  //本权值数据
-                    .b      (wire_cout[i-2] ),  //来自上一级的进位输入
+            inv_unit inv_unit_inst(
+                .a       (data_i[i]     ),
+                .b       (wire_cout[i-2]),
         
-                    .cout   (wire_cout[i-1] ),
-                    .sum    (inv_o[i]       )
-                );      
+                .xor_o   (inv_o[i]      ),  //异或输出,作为本权值位的输出数据
+                .or_o    (wire_cout[i-1]  )   //或输出,作为下一级单元的输出
+            );
         end
     endgenerate
     
-    //inv_o[16]直接由上一级半加器进位输出 以及输入数据的符号位进行同或产生
-    assign inv_o[16] = ~(wire_cout[14] ^ data_i[15]);
+    //inv_o[17]直接由上一级半加器进位输出 以及输入数据的符号位异或运算产生
+    assign inv_o[16] = (wire_cout[14] ^ data_i[15]);
     
 endmodule
