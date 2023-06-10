@@ -33,18 +33,27 @@ module inv_converter_16(
     //中间位置的取反单元inv_unit
     genvar i;
     generate 
-        for(i=2;i<=15;i=i+1) begin
+        for(i=2;i<=14;i=i+1) begin
             inv_unit inv_unit_inst(
-                .a       (data_i[i]     ),
-                .b       (wire_cout[i-2]),
+                .a       (data_i[i]       ),
+                .b       (wire_cout[i-2]  ),
         
-                .xor_o   (inv_o[i]      ),  //异或输出,作为本权值位的输出数据
+                .xor_o   (inv_o[i]        ),  //异或输出,作为本权值位的输出数据
                 .or_o    (wire_cout[i-1]  )   //或输出,作为下一级单元的输出
             );
         end
     endgenerate
     
-    //inv_o[17]直接由上一级半加器进位输出 以及输入数据的符号位异或运算产生
-    assign inv_o[16] = (wire_cout[14] ^ data_i[15]);
+    //inv_o[15]的产生由资源使用量更少的inv_unit_nor_out模块生成
+    inv_unit_nor_out inv_unit_nor_out_inst(
+        .a       (data_i[15]     ),
+        .b       (wire_cout[13]  ),
+
+        .xor_o   (inv_o[15]      ),  //异或输出
+        .nor_o   (wire_cout[14]  )   //或非输出
+    );
+    
+    //inv_o[16]直接由上一级半加器进位输出 以及输入数据的符号位同或运算产生
+    assign inv_o[16] = ~(wire_cout[14] ^ data_i[15]);
     
 endmodule
