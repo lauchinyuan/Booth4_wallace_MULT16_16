@@ -4,8 +4,40 @@
 // Email: lauchinyuan@yeah.net
 // Create Date: 2023/04/08 17:24:06
 // Module Name: booth2_pp_compressor
-// Dependencies: 将16bit乘法器通过Booth2算法产生的8个部分积进行压缩
-//使用3:2压缩方案和4:2压缩方案,并采用符号位编码方案,而非直接扩展所产生部分积的符号位
+// Description: 将16bit乘法器通过Booth2算法产生的8个部分积进行压缩,采用符号位编码方案
+
+// Resource: 
+//-----------------------------------------------------------------------------------
+//|  Module /Gate           | Module count | Transistor counts per Module  | Total  |
+//-----------------------------------------------------------------------------------
+//|  compressor_3_2         | 9            | 32                            | 288    |
+//|  compressor_4_2         | 36           | 64                            | 2304   |
+//|  half_adder             | 5            | 14                            | 70     |
+//|  in_0_1_compressor_4_2  | 3            | 34                            | 102    |
+//|  in_0_compressor_4_2    | 1            | 46                            | 46     |
+//|  in_1_compressor_4_2    | 1            | 46                            | 46     |
+//|  non_cin_compressor_4_2 | 4            | 46                            | 184    |
+//|  NOT                    | 3            | 2                             | 6      |
+//|  XOR                    | 1            | 12                            | 12     |
+//-----------------------------------------------------------------------------------
+//|  summary                | 62           | **                            | 3058   |
+//-----------------------------------------------------------------------------------
+
+// Counting resources from the gate-level circuit perspective
+// Resource:     //--------------------------------------------
+                 //|  Gate  |  Gate count  | Transistor count  |
+                 //--------------------------------------------
+                 //|  AND   |  10          | 60                | 
+                 //|  OR    |  1           | 6                 |
+                 //|  NOT   |  186         | 372               |  
+                 //|  NAND  |  272         | 1088              |
+                 //|  NOR   |  20          | 80                | 
+                 //|  AOI4  |  180         | 1440              |
+                 //|  XNOR  |  0           | 0                 |
+                 //|  XOR   |  1           | 12                |
+                 //---------------------------------------------
+                 //| summary|  669         | 3058              |
+                 //---------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -50,65 +82,19 @@ module booth2_pp_compressor(
     
     
     //第一级压缩产生部分积1(PPC1_1)和部分积2(PPC1_2)时用到的4:2压缩器的进位连线
-    wire [15:0] cout_class1_ppc12; 
+    wire [14:0] cout_class1_ppc12; 
     //第一级压缩产生部分积3(PPC1_3)和部分积4(PPC1_4)时用到的4:2压缩器的进位连线
-    wire [15:0] cout_class1_ppc34;
+    wire [14:0] cout_class1_ppc34;
     //第二级压缩4:2压缩器的进位连线
-    wire [20:0] cout_class2;
+    wire [14:0] cout_class2;
     
     //产生用于符号位编码的符号位信号,消耗1个非门资源
     wire    PP1_s  ;   
     
     //部分积1的真实符号位,因为部分积生成模块booth2_pp_gen生成的PPX的"符号位"是反逻辑
-    assign  PP1_s = ~PP1[17];
+    //取反后得到真实的符号位
+    assign  PP1_s = ~PP1[17];  //NOT
     
-    
-    
-    //test
-    wire [31:0] sum_test2;
-    wire [31:0] sum_test1;
-    wire [31:0] sum_test3;
-        wire [19:0] PP1_full;  //符号编码缩进
-    wire [20:0] PP2_full;
-    wire [22:0] PP3_full;
-    wire [24:0] PP4_full;
-    wire [26:0] PP5_full;
-    wire [28:0] PP6_full;
-    wire [30:0] PP7_full;
-    wire [32:0] PP8_full;
-    
-    wire [23:0] PPC1_1_full;
-    wire [24:0] PPC1_2_full;
-    wire [31:0] PPC1_3_full;
-    wire [31:0] PPC1_4_full;
-    wire [31:0] PPC2_2_full;
-    
-    assign PPC1_1_full = PPC1_1;
-    assign PPC1_2_full = {PPC1_2,2'b0};
-    assign PPC1_3_full = {PPC1_3,8'b0};
-    assign PPC1_4_full = {PPC1_4,10'b0};
-    assign PPC2_2_full = {PPC2_2,2'b0};
-    
-    assign sum_test1 = PP1_full+PP2_full+PP3_full+PP4_full+PP5_full+PP6_full+PP7_full+PP8_full;   
-    assign sum_test2 = PPC1_1_full + PPC1_2_full + PPC1_3_full + PPC1_4_full;
-    assign sum_test3 = PPC2_1 + PPC2_2_full;
-    
-    
-    
-      assign PP1_full = PP1_code;
-    assign PP2_full = {PP2_code,2'b0};
-    assign PP3_full = {PP3_code,4'b0};
-    assign PP4_full = {PP4_code,6'b0};
-    assign PP5_full = {PP5_code,8'b0};
-    assign PP6_full = {PP6_code,10'b0};
-    assign PP7_full = {PP7_code,12'b0};
-    assign PP8_full = {PP8_code,14'b0};  
-    
-    
-   
-   
-   
-   
     
     //对部分积进行符号位编码
     
@@ -196,7 +182,7 @@ module booth2_pp_compressor(
     //PP3_code[18]一定是1,而在同一权值的PP1_code[22]和PP2_code[20]都不存在,相当于是0
     //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP4_code[16]
     //则PPC1_1[22] = ~PP4_code[16]; PPC1_2[21] = PP4_code[16]
-    assign PPC1_1[22] = ~PP4_code[16];
+    assign PPC1_1[22] = ~PP4_code[16];  //NOT
     assign PPC1_2[21] = PP4_code[16];
     
     //最高位和最低位部分本来就是两个部分积,不用处理,直接连续赋值(接线)
@@ -294,7 +280,7 @@ module booth2_pp_compressor(
             .d   (PPC1_3[20])
     ); 
  
-    //PP7_code[18]所在的同一权位,在产生4:2压缩时,只有三个有效输入
+    //PP7_code[17]所在的同一权位,在产生4:2压缩时,只有三个有效输入
     //使用3:2压缩器即可
     compressor_3_2 compressor_3_2_class1_ppc34_20(
         .i0      (PP7_code[17]),
@@ -305,10 +291,10 @@ module booth2_pp_compressor(
         .d       (PPC1_3[21])
     ); 
 
-    //PP7_code[17]一定是1,而在同一权值的PP5_code[21]和PP6_code[19]都不存在,相当于是0
-    //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP4_code[15]
-    //则PPC1_1[21] = ~PP4_code[15]; PPC1_2[20] = PP4_code[15]
-    assign PPC1_3[22] = ~PP8_code[16];
+    //PP7_code[18]一定是1,而在同一权值的PP5_code[22]和PP6_code[20]都不存在,相当于是0
+    //且这一权值不存在来自上一级的进位,相当于这一权值的4:2压缩器的有效输入只有1和PP8_code[16]
+    //则PPC1_3[22] = ~PP8_code[16]; PPC1_4[21] = PP8_code[16];
+    assign PPC1_3[22] = ~PP8_code[16];  //NOT
     assign PPC1_4[21] = PP8_code[16];
     
     //最高位和最低位部分本来就是两个部分积,不用处理,直接连续赋值(接线)
@@ -406,7 +392,7 @@ module booth2_pp_compressor(
     ); 
     
     //PPC1_3[17]所在的同一权位,在产生4:2压缩时,只有三个有效输入
-    //使用3:2压缩器即可,会产生进位链
+    //使用3:2压缩器即可
     compressor_3_2 compressor_4_2_class2_24(
         .i0      (PPC1_3[17]),
         .i1      (PPC1_4[15]),
@@ -416,8 +402,7 @@ module booth2_pp_compressor(
         .d       (PPC2_1[25])
     ); 
     
-    //PPC1_3[18]所在的同一权位,在产生4:2压缩时,只有两个有效输入
-    //不会产生进位链 
+    //PPC1_3[18:22]所在的同一权位,在进行4:2压缩时,只有两个有效输入
     generate
         for(i=26;i<=30;i=i+1) begin: compressor_4_2_class2_half_adder_inst
             half_adder compressor_4_2_class2_half_adder_i(
@@ -431,7 +416,7 @@ module booth2_pp_compressor(
     endgenerate
     
     //PPC2_1的最高位就是PPC1_4的最高位和PPC1_3的最高位的异或
-    assign PPC2_1[31] = PPC1_4[21] ^ PPC1_3[23];
+    assign PPC2_1[31] = PPC1_4[21] ^ PPC1_3[23]; // XOR
     
     //补全部分积1(PPC2_1)和部分积2(PPC2_2)没有用到压缩的位置
     //没有变化的位置

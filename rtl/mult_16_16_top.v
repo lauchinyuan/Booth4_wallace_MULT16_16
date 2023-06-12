@@ -4,7 +4,33 @@
 // Email: lauchinyuan@yeah.net
 // Create Date: 2023/04/09 20:23:54
 // Module Name: mult_16_16_top
-// Description: 基于booth2乘数编码原理和wallace压缩树的16bit*16bit有符号乘法器
+// Description: 顶层模块,基于booth2乘数编码原理和wallace压缩树的16bit*16bit有符号乘法器
+// Resource:     
+//-----------------------------------------------------------------------------------
+//|  Module                 | Module count | Transistor counts per Module  | Total  |
+//-----------------------------------------------------------------------------------
+//|  booth2_pp_gen          | 1            | 2582                          | 2582   |
+//|  booth2_pp_compressor   | 1            | 3068                          | 3068   |
+//|  adder_32               | 1            | 898                           | 898    |
+//-----------------------------------------------------------------------------------
+//|  summary                | 3            | **                            | 6538   |
+//-----------------------------------------------------------------------------------
+
+// Counting resources from the gate-level circuit perspective
+// Resource:     //--------------------------------------------
+                 //|  Gate  |  Gate count  | Transistor count  |
+                 //--------------------------------------------
+                 //|  AND   |  20          | 120               | 
+                 //|  OR    |  16          | 96                |
+                 //|  NOT   |  267         | 534               |  
+                 //|  NAND  |  380         | 1520              |
+                 //|  NOR   |  63          | 252               | 
+                 //|  AOI4  |  496         | 3968              |
+                 //|  XNOR  |  1           | 12                |
+                 //|  XOR   |  3           | 36                |
+                 //---------------------------------------------
+                 //| summary|  1246        | 6538              |
+                 //---------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 module mult_16_16_top(
         input wire [15:0]   A_NUM   ,   //被乘数
@@ -13,7 +39,8 @@ module mult_16_16_top(
         output wire [31:0]  C_NUM       //积
     );
     
-    //由booth2编码原理生成的部分积原始数据(未进行符号扩展和补零)
+    //由Radix-4 Booth算法生成的部分积操作数
+    //未进行符号扩展和低位补零
     wire [17:0]     PP1     ;
     wire [17:0]     PP2     ;
     wire [17:0]     PP3     ;
@@ -24,20 +51,11 @@ module mult_16_16_top(
     wire [17:0]     PP8     ;
     
     //经过wallace算法压缩后输出的两个部分积
-    //不包括最高位符号位,因为最高位符号位直接用输入数据的异或门计算
-    //PPcompressed2是30bit,产生的第二个部分积的最低2bit一定是0,为简化电路结构,这里直接忽略
+    //PPcompressed2是30bit,产生的第二个部分积的最低2bit一定是0
+    //为简化电路结构,这里直接忽略
     wire [31:0]     PPcompressed1   ;
     wire [29:0]     PPcompressed2   ;
     
-    
-    
-/*     //生成符号位
-    num_preprocessor num_preprocessor_inst(
-        .A_NUM_sign (A_NUM[15]),
-        .B_NUM_sign (B_NUM[15]),
-
-        .sign       (sign   )
-    ); */
     
     //生成8个部分积
     //注意:这里产生的部分积并未进行低位补零操作
@@ -55,12 +73,10 @@ module mult_16_16_top(
         .PP8        (PP8    )
     );
     
+    // 部分积压缩模块
     booth2_pp_compressor booth2_pp_compressor_inst(
-        //8个部分积,这里的部分还未进行移位补零操作，
-        //PP1为booth2乘数编码最低位与被乘数相乘而产生的
-        //PP8为booth2乘数编码最高位与被乘数相乘而产生的
-        //即PP1为做竖式乘法运算由上往下第一行
-        .PP1        (PP1    ),
+
+        .PP1        (PP1    ),  //8个部分积,这里的部分还未进行移位补零操作
         .PP2        (PP2    ),
         .PP3        (PP3    ),
         .PP4        (PP4    ),
@@ -70,7 +86,7 @@ module mult_16_16_top(
         .PP8        (PP8    ),
 
         .PPout1     (PPcompressed1),//压缩后生成的两个部分积
-        .PPout2     (PPcompressed2) //PPcompressed1是29位数据
+        .PPout2     (PPcompressed2) //PPcompressed1是30位数据
     );
     
     

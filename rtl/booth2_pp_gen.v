@@ -4,14 +4,42 @@
 // Email:lauchinyuan@yeah.net
 // Create Date: 2023/04/09 16:39:11
 // Module Name: booth2_pp_gen 
-// Description: 利用booth2算法产生16*16乘法器的8个部分积
+// Description: 利用Radix-4 Booth算法产生16*16乘法器的8个部分积操作数
+
+// Counting resources from the module perspective
+// Resource: 
+//----------------------------------------------------------------------------------------
+//|  Module/Gate            | Module count | Transistor counts per Module/Gate  | Total  |
+//----------------------------------------------------------------------------------------
+//|  inv_converter_16       | 1            | 250                                | 250    |
+//|  booth2_pp_decoder_pp1  | 1            | 274                                | 274    |
+//|  booth2_pp_decoder      | 7            | 294                                | 2058   |
+//----------------------------------------------------------------------------------------
+//|  summary                | 9            | **                                 | 2582   |
+//----------------------------------------------------------------------------------------
+
+// Counting resources from the gate-level circuit perspective
+// Resource:     //--------------------------------------------
+                 //|  Gate  |  Gate count  | Transistor count  |
+                 //--------------------------------------------
+                 //|  AND   |  7           | 42                | 
+                 //|  OR    |  15          | 90                |
+                 //|  NOT   |  29          | 58                |  
+                 //|  NAND  |  30          | 120               |
+                 //|  NOR   |  37          | 148               | 
+                 //|  AOI4  |  264         | 2112              |
+                 //|  XNOR  |  1           | 12                |
+                 //|  XOR   |  0           | 0                 |
+                 //---------------------------------------------
+                 //| summary|  383         | 2582              |
+                 //---------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 module booth2_pp_gen(
         input wire [15:0]   A_NUM   ,   //被乘数
         input wire [15:0]   B_NUM   ,   //乘数
         
         //注意:这里产生的部分积并未进行补零操作
-        //部分积的最大长度为18位
+        //部分积操作数的位宽为18位,这是由于-2A需要使用PP[17]来表示其符号
         output wire [17:0]  PP1     ,
         output wire [17:0]  PP2     ,
         output wire [17:0]  PP3     ,
@@ -22,7 +50,7 @@ module booth2_pp_gen(
         output wire [17:0]  PP8     
     );
     //用于产生8个部分积的编码
-    wire [2:0]  B_code1 ;
+    wire [1:0]  B_code1 ;
     wire [2:0]  B_code2 ;
     wire [2:0]  B_code3 ;
     wire [2:0]  B_code4 ;
@@ -53,14 +81,16 @@ module booth2_pp_gen(
     
     //通过例化7个booth2_pp_decoder模块和1个booth2_pp_decoder_pp1得到8个部分积
     
-    //PP1的产生使用简化版的pp_decoder
+    
+    //原本要输入3bit乘数,对于第一个部分积的生成,最低位编码一定为0
+    //PP1的产生使用简化版的pp_decoder,即booth2_pp_decoder_pp1
     //PP1
     booth2_pp_decoder_pp1 booth2_pp_decoder_pp1(
-        .code_2bit   (B_code1    ),  //原本要输入3bit booth编码,对于一个部分积只需要2bit,最低位编码一定为0
+        .code_2bit   (B_code1    ),  
         .A           (A_NUM      ),  //被乘数A
         .inversed_A  (inversed_A ),  //取反后的被乘数(-A)
 
-        .pp_out      (PP1        )   //输出的部分积,输出17bit
+        .pp_out      (PP1        )   //输出的部分积操作数,输出18bit
     );
 
 
@@ -70,7 +100,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP2                )   //输出的部分积,输出17bit
+        .pp_out     (PP2                )   //输出的部分积操作数,输出18bit
     );
 
     //PP3
@@ -79,7 +109,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP3                )   //输出的部分积,输出17bit
+        .pp_out     (PP3                )   //输出的部分积操作数,输出18bit
     );
 
     //PP4
@@ -88,7 +118,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP4                )   //输出的部分积,输出17bit
+        .pp_out     (PP4                )   //输出的部分积操作数,输出18bit
     );
 
     //PP5
@@ -97,7 +127,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP5                )   //输出的部分积,输出17bit
+        .pp_out     (PP5                )   //输出的部分积操作数,输出18bit
     );
 
     //PP6
@@ -106,7 +136,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP6                )   //输出的部分积,输出17bit
+        .pp_out     (PP6                )   //输出的部分积操作数,输出18bit
     );
 
     //PP7
@@ -115,7 +145,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP7                )   //输出的部分积,输出17bit
+        .pp_out     (PP7                )   //输出的部分积操作数,输出18bit
     );
 
     //PP8
@@ -124,7 +154,7 @@ module booth2_pp_gen(
         .A          (A_NUM              ),  //被乘数A
         .inversed_A (inversed_A         ),  //取反后的被乘数(-A)
 
-        .pp_out     (PP8                )   //输出的部分积,输出17bit
+        .pp_out     (PP8                )   //输出的部分积操作数,输出18bit
     );
     
     
