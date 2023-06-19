@@ -75,6 +75,7 @@ module booth2_pp_decoder(
     //当最终部分积为-A、-2A时,选择-A作为数据本体
     //注意:这里输出的数据本体是原来数据按位取反后的结果,例如当数据本体为A时,这里输出的是~A
     //17个与或非门AOI4
+
     assign pp_source = ~(({{A[15]}, A}  & {17{flag_s2}}) | (inversed_A & {17{flag_s1}}));
     
     
