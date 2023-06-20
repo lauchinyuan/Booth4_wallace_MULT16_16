@@ -779,7 +779,7 @@ $$
    - compressor_3_2：3:2压缩器模块，实际上也是全加器电路，其电路结构如图30所示。
    - half_adder:半加器模块，其电路结构如图36所示。
 
-##### 顶层模块资源分析
+##### 分模块资源分析
 
 通过yosys分析顶层模块`HIS_MULT_TOP`的子模块构成，如图55所示，可见顶层模块包括1个部分积生成模块`booth2_pp_gen`、1个部分积压缩模块`booth2_pp_compressor`以及1个加法器模块`adder32`，下面就对这三个模块进行详细的资源分析。
 
@@ -911,7 +911,7 @@ $$
 \end{array}
 $$
 
-`inv_converter_16`模块的高位使用一个异或门实现最高位的取反处理，综合以上对子模块`inv_unit`以及`inv_unit_nor_out`的资源分析，`inv_converter_16`模块分模块统计得到的CMOS数量如表8所示，从表8中可见，`inv_converter_16`的资源代价分为250。
+`inv_converter_16`模块的高位使用一个异或门实现最高位的取反处理，综合以上对子模块`inv_unit`以及`inv_unit_nor_out`的资源分析,并结合yosys统计的子模块数量，`inv_converter_16`模块分模块统计得到的CMOS数量如表8所示，从表8中可见，`inv_converter_16`的资源代价分为250。
 
 <center>表8. inv_converter_16模块每个子模块资源统计</center>
 
@@ -1077,7 +1077,7 @@ $$
 
 <center>图65. half_adder模块电路结构</center>
 
-可以得到半加器各类门的数量以及CMOS管数量如表14所示。
+可以得到半加器`half_adder`各类门的数量以及CMOS管数量如表14所示。
 
 <center>表14. half_adder子模块门级资源用量统计</center>
 
@@ -1100,21 +1100,26 @@ $$
 \end{array}
 $$
 
-综合以上对子模块`half_adder`以及`compressor_3_2`的资源分析，`non_cin_compressor_4_2`模块分模块统计得到的CMOS数量如表15所示，可得`non_cin_compressor_4_2`的资源代价分为250。
+综合以上对子模块`half_adder`以及`compressor_3_2`的资源分析，`non_cin_compressor_4_2`模块分模块统计得到的CMOS数量如表15所示，可得`non_cin_compressor_4_2`的资源代价分为46。
 
+<center>表15. non_cin_compressor_4_2模块每个子模块资源统计</center>
 
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+{模块(门)}&{模块(门)数量}&{每个模块(门)的CMOS数量}&{CMOS总量}\\
+\hline
+{compressor\_3\_2}&{1}&{32}&{32}\\
+{half\_adder}&{1}&{14}&{14}\\
+\hline
+{总计}&{2}&{***}&{46}\\
+\hline
+\end{array}
+$$
 
+同样地，从门级结构的角度进行资源统计，统计结果如表16，CMOS数量统计值仍然是46与门级角度统计的结果一致，这比标准4：2压缩器模块`compressor_4_2`使用了更少的资源。
 
-
-
-
-
-
-
-
-由图64中的电路，可以得到模块所用的各种基本门级电路的数量及“资源代价分”如表14所示，从表中可见` non_cin_compressor_4_2`子模块的总的资源代价为274，相比普通的4:2压缩模块`compressor_4_2`少了20个CMOS管的资源开销。
-
-<center>表14.non_cin_compressor_4_2子模块门级资源用量统计</center>
+<center>表16.non_cin_compressor_4_2子模块门级资源用量统计</center>
 
 $$
 \begin{array}{|c|c|c|}
@@ -1134,3 +1139,253 @@ $$
 \hline
 \end{array}
 $$
+
+对于子模块`in_0_1_4_2`，其电路图如图66所示。
+
+![](image/in_0_1_4_2_new.png)
+
+<center>图66. in_0_1_4_2模块电路结构</center>
+
+由图66中的电路图，可以得到模块所用的各种基本门级电路的数量及“资源代价分”如表17所示，`in_0_1_4_2`子模块的总的资源代价为34，相比普通的4:2压缩模块`compressor_4_2`，CMSOS管数量减少了30。
+<center>表17. in_0_1_4_2模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{0}&{0}\\
+{OR}&{0}&{0}\\
+{NOT}&{3}&{6}\\
+{NAND}&{3}&{12}\\
+{NOR}&{0}&{0}\\
+{AOI4}&{2}&{16}\\
+{XNOR}&{0}&{0}\\
+{XOR}&{0}&{0}\\
+\hline
+{总计}&{8}&{34}\\
+\hline
+\end{array}
+$$
+
+对于模块`in_0_4_2`，其电路图如图67所示,
+
+![](image/in_0_4_2_2.png)
+
+<center>图67. in_0_4_2模块电路结构</center>
+
+通过yosys分析`in_0_4_2`模块的模块结构，如图68所示，从图中可见`in_0_4_2`由1个`compressor_3_2`子模块和1个`half_adder`子模块构成，这也符合图67中的电路结构。
+
+![](image/in_0_4_2_resource.png)
+
+<center>图68. in_0_4_2子模块统计</center>
+
+综合以上对子模块`half_adder`以及`compressor_3_2`的资源分析，`in_0_4_2`模块分模块统计得到的CMOS数量如表18所示，可得`in_0_4_2`的资源代价分为46。
+<center>表18. in_0_4_2模块每个子模块资源统计</center>
+
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+{模块(门)}&{模块(门)数量}&{每个模块(门)的CMOS数量}&{CMOS总量}\\
+\hline
+{compressor\_3\_2}&{1}&{32}&{32}\\
+{half\_adder}&{1}&{14}&{14}\\
+\hline
+{总计}&{2}&{***}&{46}\\
+\hline
+\end{array}
+$$
+
+同样地，从门级结构的角度进行资源统计，统计结果如表19，CMOS数量统计值是46与门级角度统计的结果一致，这比标准4：2压缩器模块`compressor_4_2`使用了更少的资源。
+
+<center>表19.in_0_4_2子模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{1}&{6}\\
+{OR}&{0}&{0}\\
+{NOT}&{2}&{4}\\
+{NAND}&{3}&{12}\\
+{NOR}&{2}&{8}\\
+{AOI4}&{2}&{16}\\
+{XNOR}&{0}&{0}\\
+{XOR}&{0}&{0}\\
+\hline
+{总计}&{10}&{46}\\
+\hline
+\end{array}
+$$
+
+
+对于子模块`in_1_4_2`，其电路图如图69所示。
+
+![](image/in_1_4_2_2.png)
+
+<center>图69. in_1_4_2模块电路结构</center>
+
+由图69中的电路图，可以得到模块所用的各种基本门级电路的数量及“资源代价分”如表20所示，`in_1_4_2`子模块的总的资源代价为34，相比普通的4:2压缩模块`compressor_4_2`，CMSOS管数量减少了18。
+<center>表20. in_1_4_2模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{0}&{0}\\
+{OR}&{1}&{6}\\
+{NOT}&{2}&{4}\\
+{NAND}&{5}&{20}\\
+{NOR}&{0}&{0}\\
+{AOI4}&{2}&{16}\\
+{XNOR}&{0}&{0}\\
+{XOR}&{0}&{0}\\
+\hline
+{总计}&{10}&{46}\\
+\hline
+\end{array}
+$$
+
+在符号编码时，使用了一个额外的非门产生符号位的取反，另外第一级部分积压缩过程中，两次压缩各使用一个非门，第二级压缩中，最高位使用1个异或门(XOR)产生。综合以上对子模块以及门电路资源的分析，结合yosys统计出来的模块数量，`booth2_pp_compressor`模块分模块统计得到的CMOS数量如表21所示，可得其资源代价分为3058。
+
+<center>表21. booth2_pp_compressor模块每个子模块资源统计</center>
+
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+{模块(门)}&{模块(门)数量}&{每个模块(门)的CMOS数量}&{CMOS总量}\\
+\hline
+{compressor\_3\_2}&{9}&{32}&{288}\\
+{compressor\_4\_2}&{36}&{64}&{2304}\\
+{half\_adder}&{5}&{14}&{70}\\
+{in\_0\_1\_compressor\_4\_2}&{3}&{34}&{102}\\
+{in\_0\_compressor\_4\_2}&{1}&{46}&{46}\\
+{in\_1\_compressor\_4\_2}&{1}&{46}&{46}\\
+{non\_cin\_compressor\_4\_2}&{4}&{46}&{184}\\
+{NOT}&{3}&{2}&{6}\\
+{XOR}&{1}&{12}&{12}\\
+\hline
+{总计}&{63}&{***}&{3058}\\
+\hline
+\end{array}
+$$
+
+同样地，从门级结构的角度进行资源统计，统计结果如表21，统计的MOS管数量(资源代价分)也是3058。
+<center>表21. booth2_pp_compressor模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{10}&{60}\\
+{OR}&{1}&{6}\\
+{NOT}&{186}&{372}\\
+{NAND}&{272}&{1088}\\
+{NOR}&{20}&{80}\\
+{AOI4}&{180}&{1440}\\
+{XNOR}&{0}&{0}\\
+{XOR}&{1}&{12}\\
+\hline
+{总计}&{370}&{3058}\\
+\hline
+\end{array}
+$$
+
+###### 求和模块资源统计
+
+通过yosys分析求和模块`adder_32`的子模块构成，如图70所示，可见求和模块包括26个3:2压缩器模块`compress_3_2`，3个半加器模块`half_adder`。
+
+![](image/adder_resource.png)
+
+<center>图70. adder_32子模块统计</center>
+
+综合以上对子模块`half_adder`以及`compressor_3_2`的资源分析，并结合yosys统计的子模块数量，`adder_32`模块分模块统计得到的CMOS数量如表22所示，可得`adder_32`的资源代价分为898。
+
+<center>表22. adder_32模块每个子模块资源统计</center>
+
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+{模块(门)}&{模块(门)数量}&{每个模块(门)的CMOS数量}&{CMOS总量}\\
+\hline
+{compressor\_3\_2}&{26}&{32}&{832}\\
+{half\_adder}&{3}&{14}&{42}\\
+{XOR}&{2}&{12}&{24}\\
+\hline
+{总计}&{31}&{***}&{898}\\
+\hline
+\end{array}
+$$
+
+同样地，从门级结构的角度进行资源统计，统计结果如表23，CMOS数量统计值是898，与子模块角度统计的结果一致。
+
+<center>表23.adder_32模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{3}&{18}\\
+{OR}&{0}&{0}\\
+{NOT}&{52}&{104}\\
+{NAND}&{78}&{312}\\
+{NOR}&{6}&{24}\\
+{AOI4}&{52}&{416}\\
+{XNOR}&{0}&{0}\\
+{XOR}&{2}&{24}\\
+\hline
+{总计}&{193}&{898}\\
+\hline
+\end{array}
+$$
+
+##### 顶层模块资源分析
+
+通过上一节对`booth2_pp_gen`、`booth2_pp_compressor`以及`adder32`的资源统计，结合前文中给出的yosys统计的结果，这三个子模块分别使用一个，顶层模块`HIS_MULT_TOP`分模块统计得到的CMOS数量如表24所示，可得本设计的资源代价分为6538。
+
+<center>表24. 顶层模块每个子模块资源统计</center>
+
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+{模块(门)}&{模块(门)数量}&{每个模块(门)的CMOS数量}&{CMOS总量}\\
+\hline
+{booth2\_pp\_gen}&{1}&{2582}&{2582}\\
+{booth2\_pp\_compressor}&{1}&{3068}&{3068}\\
+{adder\_32}&{1}&{898}&{898}\\
+\hline
+{总计}&{3}&{***}&{6538}\\
+\hline
+\end{array}
+$$
+
+从门级结构的角度进行资源统计，统计结果如表25，CMOS数量统计值是6538，与子模块角度统计的结果一致。
+
+<center>表25.adder_32模块门级资源用量统计</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{门}&{门数量}&{CMOS管数量}\\
+\hline
+{AND}&{34}&{204}\\
+{OR}&{16}&{96}\\
+{NOT}&{253}&{506}\\
+{NAND}&{366}&{1464}\\
+{NOR}&{63}&{252}\\
+{AOI4}&{496}&{3968}\\
+{XNOR}&{1}&{12}\\
+{XOR}&{3}&{36}\\
+\hline
+{总计}&{1232}&{6538}\\
+\hline
+\end{array}
+$$
+
+#### 性能统计
+
+本设计
