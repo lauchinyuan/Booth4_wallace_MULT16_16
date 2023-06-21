@@ -1032,7 +1032,8 @@ $$
 
 ![](image/new_4_2.png)
 
-<center>图62. compressor_4_2模块电路结构</center
+<center>图62. compressor_4_2模块电路结构</center>
+
 
 通过yosys分析`compressor_4_2`模块的模块结构，如图63所示，从图中可见`compressor_4_2`由2个`compressor_3_2`子模块构成。由图62中的电路图，也可以看出`compressor_4_2`由2个`compressor_3_2`子模块构成。
 
@@ -1494,25 +1495,178 @@ $$
 
 <center>图76. 模块关键路径统计示意图</center>
 
-鉴于本设计压缩器及求和电路都由子模块`compressor_4_2`、`compressor_3_2`、`non_cin_compressor_4_2`、`in_1_compressor_4_2`、`in_0_compressor_4_2`、`in_0_1_compressor_4_2`、`half_adder`及少量非门(NOT)、异或门组成，现分析这些模块的端到端性能代价
+鉴于本设计压缩器及求和电路都由子模块`compressor_4_2`、`compressor_3_2`、`non_cin_compressor_4_2`、`in_1_compressor_4_2`、`in_0_compressor_4_2`、`in_0_1_compressor_4_2`、`half_adder`及少量非门(NOT)、异或门组成，现分析这些模块的端到端性能代价。
+
+对于子模块`compressor_4_2`，其电路图如图77所示。
+
+![](image/new_4_2.png)
+
+<center>图77. compressor_4_2模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表28所示。
+
+<center>表28. compressor_4_2路径代价长度</center>
+
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+{输入输出端口}&{i_0/i_1}&{i_2}&{i_3}&{c_i}\\
+\hline
+{s}&{68}&{51}&{34}&{17}\\
+\hline
+{c}&{61}&{44}&{21}&{10}\\
+\hline
+{co}&{27}&{10}&{无}&{无}\\
+\hline
+\end{array}
+$$
 
 
+对于子模块`compressor_3_2`，其电路图如图78所示。
+
+![](image/3_2_new.png)
+
+<center>图78. compressor_3_2模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表29所示。
+
+<center>表29. compressor_3_2路径代价长度</center>
+
+$$
+\begin{array}{|c|c|c|}
+\hline
+{输入输出端口}&{i_0/i_1}&{c_i}\\
+\hline
+{co}&{22}&{10}\\
+\hline
+{d}&{24}&{12}\\
+\hline
+\end{array}
+$$
 
 
+对于子模块`half_adder`，其电路图如图79所示。
+
+![](image/half_adder_new.png)
+
+<center>图79. half_adder模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表30所示。
+
+<center>表30. half_adder路径代价长度</center>
+
+$$
+\begin{array}{|c|c|}
+\hline
+{输入输出端口}&{a/b}\\
+\hline
+{d}&{12}\\
+\hline
+{c}&{7}\\
+\hline
+\end{array}
+$$
 
 
+对于子模块`non_cin_4_2`，其电路图如图80所示。
+
+![](image/non_cin_4_2_2.png)
+
+<center>图80. non_cin_4_2模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表31所示。
+
+<center>表31. non_cin_4_2路径代价长度</center>
+
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+{输入输出端口}&{i_0/i_1}&{i_2}&{i_3}\\
+\hline
+{d}&{46}&{29}&{12}\\
+\hline
+{c}&{41}&{24}&{7}\\
+\hline
+{co}&{27}&{10}&{无}\\
+\hline
+\end{array}
+$$
+
+对于子模块`in_0_1_4_2`，其电路图如图81所示。
+
+![](image/in_0_1_4_2_new.png)
+
+<center>图81. in_0_1_4_2模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表32所示。
+
+<center>表32. in_0_1_4_2路径代价长度</center>
+
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+{输入输出端口}&{i_0/i_1}&{i_2}&{i_3}\\
+\hline
+{d}&{37}&{34}&{17}\\
+\hline
+{c}&{30}&{27}&{10}\\
+\hline
+{co}&{0}&{无}&{无}\\
+\hline
+\end{array}
+$$
 
 
+对于子模块`in_1_4_2`，其电路图如图82所示。
+
+![](image/in_1_4_2_2.png)
+
+<center>图82. in_1_4_2模块电路结构</center>
+
+依据电路，统计的端到端路径代价长度如表33所示。
+
+<center>表33. in_1_4_2路径代价长度</center>
+
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+{输入输出端口}&{i_0/i_1}&{i_2}&{c_i}\\
+\hline
+{d}&{46}&{34}&{17}\\
+\hline
+{c}&{39}&{27}&{10}\\
+\hline
+{co}&{7}&{无}&{无}\\
+\hline
+\end{array}
+$$
 
 
+对于子模块`in_0_4_2`，其电路图如图83所示。
 
+![](image/in_0_4_2_2.png)
 
+<center>图83. in_0_4_2模块电路结构</center>
 
+依据电路，统计的端到端路径代价长度如表34所示。
 
+<center>表34. in_0_4_2路径代价长度</center>
 
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+{输入输出端口}&{i_1/i_2}&{i_3}&{c_i}\\
+\hline
+{d}&{46}&{34}&{17}\\
+\hline
+{c}&{39}&{27}&{10}\\
+\hline
+{co}&{7}&{无}&{无}\\
+\hline
+\end{array}
+$$
 
+得到以上各个子模块的端到端路径后，通过构建excel表格，利用excel公式根据电路结构统计统计对应的性能代价分，excel表格内有有关模块的说明，请查看工程所附excel表格。
 
-
-
-
+最终统计得到的关键路径的性能代价分为467。
 

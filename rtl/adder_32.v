@@ -14,7 +14,7 @@
 //|  half_adder             | 3            | 14                            | 42     |
 //|  XOR                    | 2            | 12                            | 24     |
 //-----------------------------------------------------------------------------------
-//|  summary                | 62           | **                            | 898    |
+//|  summary                | 31           | **                            | 898    |
 //-----------------------------------------------------------------------------------
 
 // Counting resources from the gate-level circuit perspective
@@ -42,6 +42,7 @@ module adder_32(
     
     
     wire [28:0] cout_adder_32bit;
+    wire        xor_o1          ; //处理最高位时,分两级异或处理,这是第一级异或门的输出
     
     //输出数据的低两位就是31bit输入数据的低两位
     assign C[1:0] = A[1:0];
@@ -116,7 +117,8 @@ module adder_32(
         end
     endgenerate 
     
-    //C[31](最高位)使用异或门生成
-    assign C[31] = A[31] ^ B[29] ^ cout_adder_32bit[28];
+    //C[31](最高位)使用两级级联异或门生成
+    assign xor_o1 = A[31] ^ B[29];   //第一级异或门(XOR)
+    assign C[31] = xor_o1 ^ cout_adder_32bit[28];  //第二级异或门(XOR)
     
 endmodule
