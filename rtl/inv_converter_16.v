@@ -11,27 +11,28 @@
 //-----------------------------------------------------------------------------------
 //|  Module /Gate           | Module count | Transistor counts per Module  | Total  |
 //-----------------------------------------------------------------------------------
-//|  inv_unit               | 14           | 16                            | 224    |
-//|  inv_unit_nor_out       | 1            | 14                            | 14     |
-//|  XNOR                   | 1            | 12                            | 12     |
+//|  inv_unit               | 13           | 16                            | 208    |
+//|  inv_unit_nor_out       | 2            | 14                            | 28     |
+//|  NOR                    | 1            | 4                             | 4      |
+//|  NOT                    | 1            | 2                             | 2      |
 //-----------------------------------------------------------------------------------
-//|  summary                | 16           | **                            | 250    |
+//|  summary                | 17           | **                            | 242    |
 //-----------------------------------------------------------------------------------
 
 // Counting resources from the gate-level circuit perspective
 // Resource:     //--------------------------------------------
                  //|  Gate  |  Gate count  | Transistor count  |
                  //--------------------------------------------
-                 //|  AND   |  14          | 84                | 
+                 //|  AND   |  13          | 78                | 
                  //|  OR    |  15          | 90                |
-                 //|  NOT   |  0           | 0                 |  
-                 //|  NAND  |  16          | 64                |
-                 //|  NOR   |  0           | 0                 | 
+                 //|  NOT   |  1           | 2                 |  
+                 //|  NAND  |  17          | 68                |
+                 //|  NOR   |  1           | 4                 | 
                  //|  AOI4  |  0           | 0                 |
-                 //|  XNOR  |  1           | 12                |
+                 //|  XNOR  |  0           | 0                 |
                  //|  XOR   |  0           | 0                 |
                  //---------------------------------------------
-                 //| summary|  46          | 250               |
+                 //| summary|  47          | 242               |
                  //---------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 module inv_converter_16(
@@ -41,6 +42,7 @@ module inv_converter_16(
     );
     
     wire [14:0]     wire_cout       ;  //进位输出连线
+    wire            not_o           ;  //非门,输出连接到最后一级inv_unit_nor_out模块的一个输入端
     
     //inv_o最低位输出直接是data_i最低位
     //按位取反再加一,最低位不变
@@ -59,7 +61,7 @@ module inv_converter_16(
     //中间位置的取反单元inv_unit
     genvar i;
     generate 
-        for(i=2;i<=14;i=i+1) begin
+        for(i=2;i<=13;i=i+1) begin
             inv_unit inv_unit_inst(
                 .a       (data_i[i]       ),
                 .b       (wire_cout[i-2]  ),
@@ -70,17 +72,30 @@ module inv_converter_16(
         end
     endgenerate
     
-    //inv_o[15]的产生由资源使用量更少的inv_unit_nor_out模块生成
-    inv_unit_nor_out inv_unit_nor_out_inst(
+    //inv_o[15]、inv_o[14]的产生由资源使用量更少的inv_unit_nor_out模块生成
+    inv_unit_nor_out inv_unit_nor_out_inst_14(
+        .a       (data_i[14]     ),
+        .b       (wire_cout[12]  ),
+
+        .xor_o   (inv_o[14]      ),  //异或输出
+        .nor_o   (wire_cout[13]  )   //或非输出
+    );
+    
+    inv_unit_nor_out inv_unit_nor_out_inst_15(
         .a       (data_i[15]     ),
-        .b       (wire_cout[13]  ),
+        .b       (not_o          ),  //上一级模块或非输出的取反,相当于得到或输入
 
         .xor_o   (inv_o[15]      ),  //异或输出
         .nor_o   (wire_cout[14]  )   //或非输出
     );
     
-    //inv_o[16]直接由上一级半加器进位输出 以及输入数据的符号位同或运算产生
-    //同或门(XNOR)
-    assign inv_o[16] = ~(wire_cout[14] ^ data_i[15]);
+    
+    //对产生inv_o[14]的inv_unit_nor_out模块的或非输出(nor_o)求非,相当于得到或输出
+    //非门(NOT)
+    assign not_o     = ~wire_cout[13]   ;
+    
+    //通过一个或非门得到inv_o[16]
+    //或非门(NOR)
+    assign inv_o[16] = ~(wire_cout[13] | data_i[15]);
     
 endmodule
