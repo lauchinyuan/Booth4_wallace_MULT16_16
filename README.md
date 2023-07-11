@@ -1,6 +1,6 @@
 ### 关于
 
-本项目源自第六届中国研究生创“芯”大赛中的华为企业赛题十，定点高效乘法器的实现。master branch是16位乘16位有符号乘法器，另一个branch，mult_8_8提供了同样实现思路的8位乘8位有符号乘法器。
+本项目源自第六届中国研究生创“芯”大赛中的华为企业赛题十，定点高效乘法器的实现。[master branch](https://github.com/lauchinyuan/Booth4_wallace_MULT16_16/tree/master)是16位乘16位有符号乘法器，另一个branch，[mult_8_8](https://github.com/lauchinyuan/Booth4_wallace_MULT16_16/tree/mult_8_8)提供了同样实现思路的8位乘8位有符号乘法器。
 
 **队友[TLbaby](https://github.com/TLbaby)、[jpz185](https://github.com/jpz185)在文献搜集、booth解码方法、符号位扩展预编码等方面提供了很大的帮助，在此表示感谢！(●'◡'●)。**
 
