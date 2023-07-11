@@ -2,37 +2,23 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Author: lauchinyuan
 // Email: lauchinyuan@yeah.net
-// Create Date: 2023/05/04 12:43:48
+// Create Date: 2023/07/11 17:13:48
 // Module Name: booth2_pp_decoder_pp1
 // Description: 产生部分积pp1的专用解码器
 //              booth算法对于第一个部分积，输入的三位booth编码为{b1,b0,b-1}
 //              其中b-1一定为0,故可以使用专用结构来简化电路
-// Resource:     //---------------------------------------------
-                 //|  Gate  |  Gate count  | Transistor count  |
-                 //---------------------------------------------
-                 //|  AND   |  0           | 0                 | 
-                 //|  OR    |  0           | 0                 |
-                 //|  NOT   |  1           | 2                 |  
-                 //|  NAND  |  0           | 0                 |
-                 //|  NOR   |  2           | 8                 | 
-                 //|  AOI4  |  33          | 264               |
-                 //|  XNOR  |  0           | 0                 |
-                 //|  XOR   |  0           | 0                 |
-                 //---------------------------------------------
-                 //| summary|  36          | 274               |
-                 //---------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module booth2_pp_decoder_pp1(
         input wire  [1:0]       code_2bit   ,  //原本要输入3bit booth编码,对于一个部分积只需要2bit,最低位编码一定为0
-        input wire  [15:0]      A           ,  //被乘数A
-        input wire  [16:0]      inversed_A  ,  //取反后的被乘数(-A)
+        input wire  [7:0]      A           ,  //被乘数A
+        input wire  [8:0]      inversed_A  ,  //取反后的被乘数(-A)
         
-        output wire [17:0]      pp_out         //输出的部分积,输出18bit,因为-2*16'h8000需要使用18bit表示
+        output wire [9:0]      pp_out         //输出的部分积,输出10bit,因为-2*8'h80需要使用10bit表示
     );
     
-    wire [16:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
+    wire [8:0] pp_source       ;//部分积数据的来源(数据本体),可以是A或者-A
     
     //可以复用的信号作为中间变量
     wire not_code0 ;
@@ -67,8 +53,8 @@ module booth2_pp_decoder_pp1(
     //当最终部分积为A、2A时,选择A作为数据本体
     //当最终部分积为-A、-2A时,选择-A作为数据本体
     //注意:这里输出的数据本体是原来数据按位取反后的结果,例如当数据本体为A时,这里输出的是~A
-    //17个与或非门NOR
-    assign pp_source = ~(({{A[15]}, A}  & {17{flag_s2}}) | (inversed_A & {17{flag_s1}}));
+    //9个与或非门NOR
+    assign pp_source = ~(({{A[7]}, A}  & {9{flag_s2}}) | (inversed_A & {9{flag_s1}}));
     
     
     //通过flag_2x和flag_not_2x信号确定是否需要将数据本体乘以2
@@ -80,16 +66,13 @@ module booth2_pp_decoder_pp1(
     
     //高位依据flag_2x和flag_not_2x信号来选择是否需要移位,部分积生成的逻辑表达式为
     //pp_out[i] = flag_2x & (~pp_source[i-1]) + flag_not_2x & ~(pp_source[i])
-    //通过化简逻辑表达式,使用16个与或非门实现pp_out[15:1]
-    //16个与或非门AOI4
-    assign pp_out[16:1] = ~(({16{flag_2x}} & pp_source[15:0]) | ({16{flag_not_2x}} & pp_source[16:1]));
+    //通过化简逻辑表达式,使用8个与或非门实现pp_out[8:1]
+    //8个与或非门AOI4
+    assign pp_out[8:1] = ~(({8{flag_2x}} & pp_source[7:0]) | ({8{flag_not_2x}} & pp_source[8:1]));
     
-    //对于部分积为A和-A的情况,pp_source[17]如果存在,则一定有pp_source[17] = pp_source[16]
-    //即pp_out[17] = ~(flag_2x & pp_source[16] + flag_not_2x & pp_source[17]) = 
-    // = ~(flag_2x & pp_source[16] + flag_not_2x & pp_source[16]) = ~pp_source[16];
     
     //最高位是反逻辑”符号位“,0代表负数,1代表正数,在后续电路中使用的是符号位的取反
     //这一操作可以节省非门的使用
     //无需额外电路资源
-    assign pp_out[17] = pp_source[16];
+    assign pp_out[9] = pp_source[8];
 endmodule
