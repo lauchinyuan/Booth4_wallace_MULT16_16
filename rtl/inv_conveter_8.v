@@ -15,7 +15,7 @@ module inv_converter_8(
         output wire[8:0]   inv_o    //输出相反数
     );
     
-    wire [6:0]     wire_cout       ;  //进位输出连线
+    wire [5:0]      wire_cout       ;  //进位输出连线
     wire            not_o           ;  //非门,输出连接到最后一级inv_unit_nor_out模块的一个输入端
     
     //inv_o最低位输出直接是data_i最低位
@@ -57,10 +57,10 @@ module inv_converter_8(
     
     inv_unit_nor_out inv_unit_nor_out_inst_7(
         .a       (data_i[7]     ),
-        .b       (not_o          ),  //上一级模块或非输出的取反,相当于得到或输入
+        .b       (not_o         ),  //上一级模块或非输出的取反,相当于得到或输入
 
         .xor_o   (inv_o[7]      ),  //异或输出
-        .nor_o   (wire_cout[6]  )   //或非输出
+        .nor_o   (              )   //或非输出
     );
     
     

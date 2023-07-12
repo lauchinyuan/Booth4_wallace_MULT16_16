@@ -14,7 +14,7 @@ module adder_16(
     );
     
     
-    wire [28:0] cout_adder_16bit;
+    wire [12:0] cout_adder_16bit;
     wire        xor_o1          ; //处理最高位时,分两级异或处理,这是第一级异或门的输出
     
     //输出数据的低两位就是31bit输入数据的低两位
